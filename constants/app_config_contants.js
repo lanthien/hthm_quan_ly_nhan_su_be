@@ -1,0 +1,1 @@
+const secretKey = 'aG9pIHRoYW5oIGhvYyBtb24='

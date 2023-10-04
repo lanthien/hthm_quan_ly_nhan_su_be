@@ -1,23 +1,23 @@
-var MongoClient = require('mongodb').MongoClient;
+import { MongoClient } from 'mongodb';
 var dbName = 'quan_ly_nhan_su_db'
-var url = `mongodb://localhost:27017/`
+var url = 'mongodb://localhost:27017/'
 
 class DatabaseService {
     constructor(){}
 
     createDabase() {
-        MongoClient.connect(dbName + dbName, function(err: any, db: any) {
+        MongoClient.connect(dbName + dbName, function(err, db) {
             if (err) throw err
             console.log("Database created")
             db.close()
         })
     }
 
-    createTable(tableName: string) {
-        MongoClient.connect(url, function(err: any, db: any) {
+    createTable(tableName) {
+        MongoClient.connect(url, function(err, db) {
             if (err) throw err
             var dbo = db.db(dbName)
-            dbo.createCollection(tableName, function(err: any, res: any) {
+            dbo.createCollection(tableName, function(err, res) {
                 if (err) throw err
                 console.log("Database created")
                 db.close()
@@ -25,11 +25,11 @@ class DatabaseService {
         })
     }
 
-    insertData(table: string, data: object) {
-        MongoClient.connect(url, function(error: any, database: any) {
+    insertData(table, data) {
+        MongoClient.connect(url, function(error, database) {
             if (error) throw error;
             var dbo = database.db(dbName);
-            dbo.collection(table).insertOne(data, function(error: any, res: any) {
+            dbo.collection(table).insertOne(data, function(error, res) {
               if (error) throw error;
               console.log("1 document inserted");
               database.close();
@@ -37,11 +37,11 @@ class DatabaseService {
           });
     }
 
-    queryData(table: string, data: object) {
-        MongoClient.connect(url, function(error: any, database: any) {
+    queryData(table, data) {
+        MongoClient.connect(url, function(error, database) {
             if (error) throw error;
             var dbo = database.db(dbName);
-            dbo.collection(table).find(data).toArray(function(error: any, result: any) {
+            dbo.collection(table).find(data).toArray(function(error, result) {
               if (error) throw error;
               console.log(result);
               database.close();
@@ -49,11 +49,11 @@ class DatabaseService {
           });
     }
 
-    deleteData(table: string, data: object) {
-        MongoClient.connect(url, function(error: any, database: any) {
+    deleteData(table, data) {
+        MongoClient.connect(url, function(error, database) {
             if (error) throw error;
             var dbo = database.db(dbName);
-            dbo.collection(table).deleteOne(data, function(error: any, result: any) {
+            dbo.collection(table).deleteOne(data, function(error, result) {
               if (error) throw error;
               console.log(result);
               database.close();
@@ -61,11 +61,11 @@ class DatabaseService {
           });
     }
 
-    updateData(table: string, query: object, newData: object) {
-        MongoClient.connect(url, function(error: any, database: any) {
+    updateData(table, query, newData) {
+        MongoClient.connect(url, function(error, database) {
             if (error) throw error
             var dbo = database.db(dbName)
-            dbo.collection(table).updateOne(query, newData, function(err: any, result: any) {
+            dbo.collection(table).updateOne(query, newData, function(err, result) {
                 if (err) throw err;
                 console.log(result);
                 database.close();
