@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose, {model, InferSchemaType} from 'mongoose'
 const { Schema } = mongoose;
 
 var MemberModelSchema = new Schema({
@@ -18,4 +18,6 @@ var MemberModelSchema = new Schema({
     ngay_cap_nhat: Date,
 })
 
-export default mongoose.model('MemberModel', MemberModelSchema)
+export type MemberModelType = InferSchemaType<typeof MemberModelSchema>
+const MemberModel = model('MemberModel', MemberModelSchema)
+export default MemberModel

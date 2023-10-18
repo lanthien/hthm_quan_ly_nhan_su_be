@@ -1,25 +1,28 @@
-import LoginModel from '../models/login_model.js'
-import { isNull, isUndefined } from '../constants/utils.js'
-import MemberModel from '../models/member_model.js'
+import LoginModel, { LoginModelType } from '../models/login_model.ts'
+import { isNull, isUndefined } from '../constants/utils.ts'
+import MemberModel from '../models/member_model.ts'
 
-class AuthenticatorService {
+export default class AuthenticatorService {
     constructor() {}
 
-    async getUserByUserName(username) {
+    async getUserByUserName(username: String) : Promise<LoginModelType | null | undefined>  {
         try {
-            return await LoginModel.findOne({ username : username }).populate('profile').exec()
+            return await LoginModel.findOne({ username : username })
+            .select('-password')
+            .populate('profile')
+            .exec()
         }
         catch (error) {
             return undefined
         }
     }
 
-    async verifyPassword(inputPassword, user) {
+    async verifyPassword(inputPassword: String, user: LoginModelType) {
         let password = user['password']
         return Promise.resolve(password == inputPassword) 
     }
 
-    async login(username, password) {
+    async login(username: String, password: String) {
         let model = await this.getUserByUserName(username)
         if ((isNull(model) || isUndefined(model))) {
             return {
@@ -27,7 +30,7 @@ class AuthenticatorService {
                 message: 'Username is not existed'
             }
         }
-        if (!(await this.verifyPassword(password, model))) {
+        if (!(await this.verifyPassword(password, model!))) {
             return {
                 status: 'FAILED',
                 message: 'Wrong password'
@@ -36,7 +39,7 @@ class AuthenticatorService {
         return model
     }
 
-    async signup(username, password) {
+    async signup(username: String, password: String) {
         let member = await this.getUserByUserName(username)
         if (member) {
             return {
@@ -47,7 +50,7 @@ class AuthenticatorService {
         
         try {
             let memberModel = new MemberModel();
-            memberModel.save()
+            await memberModel.save()
             let loginModel = new LoginModel({
                 username: username,
                 password: password,
@@ -64,5 +67,3 @@ class AuthenticatorService {
         
     }
 }
-
-export default AuthenticatorService
