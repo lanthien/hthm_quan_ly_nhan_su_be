@@ -1,11 +1,12 @@
 import mongoose from 'mongoose'
-import express from 'express'
+import express, { query, response } from 'express'
 import fs from 'fs'
 
 import AuthenticatorService from '../services/authenticator_service.ts'
 import DatabaseService from '../services/database_service.ts'
 import LoginModel, {LoginModelType} from '../models/login_model.ts'
 import MemberModel, {MemberModelType} from '../models/member_model.ts'
+import { error } from 'console'
 
 const options = {
     key: fs.readFileSync('../resources/config_files/key.pem'),
@@ -56,6 +57,15 @@ app.post('/addNewMember', (request, response) => {
 app.get('/getAllMembers', async (request, response) => {
     let members = await databaseService.getMembers()
     response.send(JSON.stringify(members))
+})
+
+app.delete('/deleteMemember', async (request, response) => {
+    try {
+        let member = await databaseService.deleteMember({ _id : request.body.id})
+        response.send(JSON.stringify(member))
+    } catch {
+        response.send(error);
+    }
 })
 
 

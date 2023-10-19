@@ -23,7 +23,7 @@ export default class AuthenticatorService {
     }
 
     async login(username: String, password: String) {
-        let model = await this.getUserByUserName(username)
+        let model = await LoginModel.findOne({ username : username })
         if ((isNull(model) || isUndefined(model))) {
             return {
                 status: 'FAILED',
@@ -36,7 +36,12 @@ export default class AuthenticatorService {
                 message: 'Wrong password'
             }
         }
-        return model
+        return new LoginModel({
+            _id: model?.id,
+            username: model?.username, 
+            profile: model?.profile, 
+            createAt: model?.createAt
+        }).populate('profile')
     }
 
     async signup(username: String, password: String) {
@@ -47,16 +52,21 @@ export default class AuthenticatorService {
                 message: 'This username is already used'
             }
         }
-        
         try {
             let memberModel = new MemberModel();
             await memberModel.save()
             let loginModel = new LoginModel({
                 username: username,
                 password: password,
-                profile: memberModel._id
+                profile: memberModel._id,
+                createAt: Date()
             })
-            return await loginModel.save()
+            await loginModel.save()
+            return new LoginModel({
+                username: username,
+                profile: memberModel._id,
+                createAt: Date()
+            }).populate('profile')
         } catch (error) {
             console.log('Error ' + error)
             return {

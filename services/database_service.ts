@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 import MemberModel from '../models/member_model.ts'
 import LoginModel, { LoginModelType } from '../models/login_model';
 import { Console, error } from 'console';
@@ -54,12 +54,19 @@ export default class DatabaseService {
             }
             return LoginModel.find({})
             .select('-password')
-            .populate('profile')
+            .populate('profile', 'ho_ten chuc_danh')
             .exec()
         } catch {
             console.log(error)
             return []
         }
-        
     }
+
+    async deleteMember(query: Object) : Promise<LoginModelType | null> {
+        return await LoginModel.findOneAndDelete(query)
+    }
+}
+
+class DatabaseService1<T extends Schema> {
+
 }
