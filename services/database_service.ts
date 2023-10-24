@@ -1,7 +1,11 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import MemberModel from '../models/member_model.ts'
+import mongoose, { Schema, Model, PopulateOption } from 'mongoose';
+import MemberModel, { MemberModelType } from '../models/member_model.ts'
 import LoginModel, { LoginModelType } from '../models/login_model';
 import { Console, error } from 'console';
+import ChurchModel from '../models/church_model.ts';
+import DepartmentModel from '../models/department_model.ts';
+import PositionModel from '../models/position_model.ts';
+import TitleModel from '../models/title_model.ts';
 var dbName = 'quan_ly_nhan_su_db'
 var url = 'mongodb://localhost:27017/'
 
@@ -13,6 +17,11 @@ export default class DatabaseService {
         mongoose.connect('mongodb://127.0.0.1:27017/test')
         await LoginModel.createCollection()
         await MemberModel.createCollection()
+        await ChurchModel.createCollection()
+        await DepartmentModel.createCollection()
+        await PositionModel.createCollection()
+        await TitleModel.createCollection()
+
     }
 
     addNewMember(json: any) : LoginModelType {
@@ -52,9 +61,17 @@ export default class DatabaseService {
                 .populate('profile')
                 .exec();
             }
-            return LoginModel.find({})
+            return LoginModel.find()
             .select('-password')
-            .populate('profile', 'ho_ten chuc_danh')
+            .populate({
+                path: 'profile',
+                populate: [
+                    { path: 'title' },
+                    { path: 'position' },
+                    { path: 'joiningChurchs' },
+                    { path: 'churchOwner' }
+                ]
+            })
             .exec()
         } catch {
             console.log(error)
@@ -65,8 +82,4 @@ export default class DatabaseService {
     async deleteMember(query: Object) : Promise<LoginModelType | null> {
         return await LoginModel.findOneAndDelete(query)
     }
-}
-
-class DatabaseService1<T extends Schema> {
-
 }
