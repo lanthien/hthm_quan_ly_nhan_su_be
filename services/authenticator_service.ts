@@ -39,8 +39,7 @@ export default class AuthenticatorService {
         return new LoginModel({
             _id: model?.id,
             username: model?.username, 
-            profile: model?.profile, 
-            createAt: model?.createAt
+            profile: model?.profile
         }).populate('profile')
     }
 
@@ -53,7 +52,9 @@ export default class AuthenticatorService {
             }
         }
         try {
-            let memberModel = new MemberModel();
+            let memberModel = new MemberModel({
+                createAt: Date()
+            });
             await memberModel.save()
             let loginModel = new LoginModel({
                 username: username,

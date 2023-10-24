@@ -1,23 +1,27 @@
-import mongoose, {model, InferSchemaType} from 'mongoose'
-const { Schema } = mongoose;
+import {model, InferSchemaType, Schema, Types} from 'mongoose';
+import TitleModel from './title_model';
+import DepartmentModel from './department_model';
+import PositionModel from './position_model';
+import ChurchModel from './church_model';
 
 var MemberModelSchema = new Schema({
-    ho_ten: String,
-    chuc_danh: String,
-    chuc_vu: String,
-    ban_nganh: String,
-    gioi_tinh: String,
-    dan_toc: String,
-    ngay_sinh: String,
-    dia_chi: String,
-    thuong_tru: String,
-    hoi_thanh_sinh_hoat: String,
-    hoi_thanh_quan_nhiem: String,
-    ngay_xoa: Date,
-    ngay_tao: Date,
-    ngay_cap_nhat: Date,
-})
+    name: String,
+    title: { type: Types.ObjectId, ref: 'TitleModel' },
+    position: { type: Types.ObjectId, ref: 'PositionModel' },
+    department: { type: Types.ObjectId, ref: 'DepartmentModel' },
+    genre: String,
+    national: String,
+    birthday: String,
+    tempAddress: String,
+    permanentAddress: String,
+    joiningChurchs: [{ type: Types.ObjectId, ref: 'ChurchModel', default: [] }],
+    churchOwner: { type: Types.ObjectId, ref: 'ChurchModel' },
+    isActive: Boolean,
+    createAt: Date,
+    updateAt: Date,
+    // userUpdate: { type: Schema.Types.ObjectId, ref: 'LoginModel' }
+});
 
-export type MemberModelType = InferSchemaType<typeof MemberModelSchema>
-const MemberModel = model('MemberModel', MemberModelSchema)
-export default MemberModel
+export type MemberModelType = InferSchemaType<typeof MemberModelSchema>;
+const MemberModel = model('MemberModel', MemberModelSchema);
+export default MemberModel;
