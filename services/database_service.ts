@@ -58,7 +58,15 @@ export default class DatabaseService {
             if (query != null) {
                 return LoginModel.find(query)
                 .select('-password')
-                .populate('profile')
+                .populate({
+                    path: 'profile',
+                    populate: [
+                        { path: 'title' },
+                        { path: 'position' },
+                        { path: 'joiningChurchs' },
+                        { path: 'churchOwner' }
+                    ]
+                })
                 .exec();
             }
             return LoginModel.find()
