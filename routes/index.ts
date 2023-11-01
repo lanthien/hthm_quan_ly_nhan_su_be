@@ -7,12 +7,14 @@ import DatabaseService from '../services/database_service.ts'
 import LoginModel, {LoginModelType} from '../models/login_model.ts'
 import MemberModel, {MemberModelType} from '../models/member_model.ts'
 import { error } from 'console'
+import MemberDAO from '../dao/member_dao.ts'
 
 const options = {
     key: fs.readFileSync('../resources/config_files/key.pem'),
     cert: fs.readFileSync('../resources/config_files/cert.pem')
 }
 const databaseService = new DatabaseService()
+const memberDAO = new MemberDAO();
 
 var app = express()
 app.use(express.json()) 
@@ -48,20 +50,21 @@ app.post('/login', async (request, response) => {
     })
 })
 
+//Member
 app.post('/addNewMember', (request, response) => {
     let body = request.body
-    let responseModel = databaseService.addNewMember(body)
+    let responseModel = memberDAO.addNewMember(body)
     response.send(JSON.stringify(responseModel))
 })
 
 app.get('/getAllMembers', async (request, response) => {
-    let members = await databaseService.getMembers()
+    let members = await memberDAO.getMembers()
     response.send(JSON.stringify(members))
 })
 
 app.delete('/deleteMemember', async (request, response) => {
     try {
-        let member = await databaseService.deleteMember({ _id : request.body.id})
+        let member = await memberDAO.deleteMember({ _id : request.body.id})
         response.send(JSON.stringify(member))
     } catch {
         response.send(error);
