@@ -1,6 +1,6 @@
 import PositionModel, { PositionModelType } from "../models/position_model";
 
-export default class TitleDAO {
+export default class PositionDAO {
     getAllPositions() : Promise<Array<PositionModelType>> {
         return PositionModel.find({}).exec()
     }

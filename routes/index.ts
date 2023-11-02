@@ -8,13 +8,21 @@ import LoginModel, {LoginModelType} from '../models/login_model.ts'
 import MemberModel, {MemberModelType} from '../models/member_model.ts'
 import { error } from 'console'
 import MemberDAO from '../dao/member_dao.ts'
+import TitleDAO from '../dao/title_dao.ts'
+import ChurchDAO from '../dao/church_dao.ts'
+import DepartmentDAO from '../dao/department_dao.ts'
+import PositionDAO from '../dao/position_dao.ts'
 
 const options = {
     key: fs.readFileSync('../resources/config_files/key.pem'),
     cert: fs.readFileSync('../resources/config_files/cert.pem')
 }
 const databaseService = new DatabaseService()
-const memberDAO = new MemberDAO();
+const memberDAO = new MemberDAO()
+const titleDAO = new TitleDAO()
+const churchDAO = new ChurchDAO()
+const departmentDAO = new DepartmentDAO()
+const positionDAO = new PositionDAO()
 
 var app = express()
 app.use(express.json()) 
@@ -71,4 +79,51 @@ app.delete('/deleteMemember', async (request, response) => {
     }
 })
 
+// Titles
+app.get('/getAllTitles', async (resquest, response) => {
+    try {
+        let titles = await titleDAO.getAllTitle()
+        response.send(JSON.stringify(titles))
+    } catch {
+        response.send(error);
+    }
+})
 
+/// Church
+app.get('/getAllChurchs', async (resquest, response) => {
+    try {
+        let churchs = await churchDAO.getAllChurchs()
+        response.send(JSON.stringify(churchs))
+    } catch {
+        response.send(error);
+    }
+})
+
+app.post('/addNewChurch', async (request, response) => {
+    try {
+        let churchs = await churchDAO.addChurch(request.body['name'], request.body['address'] )
+        response.send(JSON.stringify(churchs))
+    } catch {
+        response.send(error);
+    }
+})
+
+/// Department
+app.get('/getAllDepartments', async (resquest, response) => {
+    try {
+        let departments = await departmentDAO.getAllDepartments()
+        response.send(JSON.stringify(departments))
+    } catch {
+        response.send(error);
+    }
+})
+
+/// Position
+app.get('/getAllPositions', async (resquest, response) => {
+    try {
+        let positions = await positionDAO.getAllPositions()
+        response.send(JSON.stringify(positions))
+    } catch {
+        response.send(error);
+    }
+})

@@ -5,8 +5,12 @@ export default class ChurchDAO {
         return ChurchModel.find({}).exec()
     }
 
-    async addChurch(titleName: String) : Promise<ChurchModelType> {
-        const newPosition = new ChurchModel(titleName);
+    async addChurch(titleName: String, address: String) : Promise<ChurchModelType> {
+        const newPosition = new ChurchModel({
+            name: titleName, 
+            address: address,
+            createAt: new Date().getTime()
+        });
         return await newPosition.save()
     }
 
