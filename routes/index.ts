@@ -1,17 +1,16 @@
-import mongoose from 'mongoose'
-import express, { query, response } from 'express'
+import express from 'express'
 import fs from 'fs'
-
 import AuthenticatorService from '../services/authenticator_service.ts'
 import DatabaseService from '../services/database_service.ts'
-import LoginModel, {LoginModelType} from '../models/login_model.ts'
-import MemberModel, {MemberModelType} from '../models/member_model.ts'
-import { error } from 'console'
+import LoginModel from '../models/login_model.ts'
+import MemberModel from '../models/member_model.ts'
 import MemberDAO from '../dao/member_dao.ts'
 import TitleDAO from '../dao/title_dao.ts'
 import ChurchDAO from '../dao/church_dao.ts'
 import DepartmentDAO from '../dao/department_dao.ts'
 import PositionDAO from '../dao/position_dao.ts'
+import { upload } from '../services/multer_service.ts'
+import { error } from 'console'
 
 const options = {
     key: fs.readFileSync('../resources/config_files/key.pem'),
@@ -28,6 +27,8 @@ var app = express()
 app.use(express.json()) 
 app.use(express.urlencoded({extended: true}))
 databaseService.initialDatabase()
+app.use(express.static(__dirname + '/public'));
+app.use('/uploads', express.static('uploads'));
 
 app.listen(12345, () => {console.log('server is runing at port 4000')})
 
@@ -126,4 +127,14 @@ app.get('/getAllPositions', async (resquest, response) => {
     } catch {
         response.send(error);
     }
+})
+
+app.post('/uploadAvatar', upload.single('myfile'), (request, response, next) => {
+    const file = request.file
+    if (!file) {
+      var error = new Error('Please upload a file')
+      response.status(400)
+      return next(error)
+    }
+    response.send(file)
 })
