@@ -40,7 +40,16 @@ export default class AuthenticatorService {
             _id: model?.id,
             username: model?.username, 
             profile: model?.profile
-        }).populate('profile')
+        }).populate({
+            path: 'profile',
+            populate: [
+                { path: 'title' },
+                { path: 'position' },
+                { path: 'joiningChurchs' },
+                { path: 'churchOwner' },
+                { path: 'department' }
+            ]
+        })
     }
 
     async signup(username: String, password: String) {
@@ -67,7 +76,16 @@ export default class AuthenticatorService {
                 username: username,
                 profile: memberModel._id,
                 createAt: Date()
-            }).populate('profile')
+            }).populate({
+                path: 'profile',
+                populate: [
+                    { path: 'title' },
+                    { path: 'position' },
+                    { path: 'joiningChurchs' },
+                    { path: 'churchOwner' },
+                    { path: 'department' }
+                ]
+            })
         } catch (error) {
             console.log('Error ' + error)
             return {

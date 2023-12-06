@@ -5,20 +5,24 @@ import MemberModel from "../models/member_model"
 export default class MemberDAO {
     addNewMember(json: any) : LoginModelType {
         let memberModel = new MemberModel({
-            ho_ten: json.ho_ten,
-            chuc_danh: json.chuc_danh,
-            chuc_vu: json.chuc_vu,
-            ban_nganh: json.ban_nganh,
-            gioi_tinh: json.gioi_tinh,
-            dan_toc: json.dan_toc,
-            ngay_sinh: json.ngay_sinh,
-            dia_chi: json.dia_chi,
-            thuong_tru: json.thuong_tru,
-            hoi_thanh_sinh_hoat: json.hoi_thanh_sinh_hoat,
-            hoi_thanh_quan_nhiem: json.hoi_thanh_quan_nhiem,
-            ngay_xoa: json.ngay_xoa,
-            ngay_tao: json.ngay_tao,
-            ngay_cap_nhat: json.ngay_cap_nhat
+            name: json.name,
+            phoneNumer: json.phoneNumer,
+            personalId: json.personalId,
+            title: json.title,
+            position: json.position,
+            department: json.department,
+            genre: json.genre,
+            national: json.national,
+            birthday: json.birthday,
+            tempAddress: json.tempAddress,
+            permanentAddress: json.permanentAddress,
+            joiningChurchs:  json.joiningChurchs == null || json.joiningChurchs.toString().length === 0 
+                                ? undefined 
+                                : json.joiningChurchs.toString().split(','),
+            churchOwner: json.churchOwner ?? undefined,
+            updateAt: new Date().getMilliseconds(),
+            createAt: new Date().getMilliseconds(),
+            isActive: true,
         })
         memberModel.save()
         let loginModel = new LoginModel({
@@ -43,8 +47,10 @@ export default class MemberDAO {
                         { path: 'title' },
                         { path: 'position' },
                         { path: 'joiningChurchs' },
-                        { path: 'churchOwner' }
-                    ]
+                        { path: 'churchOwner' },
+                        { path: 'department' }
+                    ],
+                    
                 })
                 .exec();
             }
@@ -56,7 +62,8 @@ export default class MemberDAO {
                     { path: 'title' },
                     { path: 'position' },
                     { path: 'joiningChurchs' },
-                    { path: 'churchOwner' }
+                    { path: 'churchOwner' },
+                    { path: 'department' }
                 ]
             })
             .exec()

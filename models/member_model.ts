@@ -6,19 +6,19 @@ import ChurchModel from './church_model';
 
 var MemberModelSchema = new Schema({
     name: String,
+    phoneNumer: String,
+    personalId: String,
     title: { type: Types.ObjectId, ref: 'TitleModel' },
     position: { type: Types.ObjectId, ref: 'PositionModel' },
     department: { type: Types.ObjectId, ref: 'DepartmentModel' },
     genre: String,
     national: String,
-    birthday: String,
+    birthday: {type: Date, trim: true},
     tempAddress: String,
     permanentAddress: String,
     joiningChurchs: [{ type: Types.ObjectId, ref: 'ChurchModel', default: [] }],
     churchOwner: { type: Types.ObjectId, ref: 'ChurchModel' },
     isActive: Boolean,
-    createAt: Date,
-    updateAt: Date,
     // userUpdate: { type: Schema.Types.ObjectId, ref: 'LoginModel' }
 });
 
