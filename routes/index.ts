@@ -71,14 +71,24 @@ app.get('/getAllMembers', async (request, response) => {
     response.send(JSON.stringify(members))
 })
 
-app.delete('/deleteMemember', async (request, response) => {
+app.delete('/deleteMember', async (request, response) => {
     try {
-        let member = await memberDAO.deleteMember({ _id : request.body.id})
+        let member = await memberDAO.deleteMember({ _id : request.body.userId})
         response.send(JSON.stringify(member))
     } catch {
         response.send(error);
     }
 })
+
+app.delete('/updateMember', async (request, response) => {
+    try {
+        let member = await memberDAO.updateMember(request.body)
+        response.send("Ok")
+    } catch {
+        response.send(error);
+    }
+})
+
 
 // Titles
 app.get('/getAllTitles', async (resquest, response) => {

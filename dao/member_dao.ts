@@ -74,6 +74,10 @@ export default class MemberDAO {
     }
     
     async deleteMember(query: Object) : Promise<LoginModelType | null> {
-        return await LoginModel.findOneAndDelete(query)
+        return await LoginModel.findOneAndUpdate(query, {isActive: false})
+    }
+
+    async updateMember(member: any) {
+        await LoginModel.updateOne({_id : member.id}, member);
     }
 }
