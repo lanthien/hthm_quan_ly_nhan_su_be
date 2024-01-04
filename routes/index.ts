@@ -84,8 +84,8 @@ app.delete('/updateMember', async (request, response) => {
     try {
         let member = await memberDAO.updateMember(request.body)
         response.send("Ok")
-    } catch {
-        response.send(error);
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
     }
 })
 
@@ -100,13 +100,32 @@ app.get('/getAllTitles', async (resquest, response) => {
     }
 })
 
+app.post('/createTitle', async (request, response) => {
+    try {
+        let departments = await titleDAO.addTitle(request.body['name']);
+        response.send(JSON.stringify(departments))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
+app.post('/title', async (request, response) => {
+    try {
+        const titleId = request.query.id as String;
+        let departments = await titleDAO.updateTitle(titleId, request.body);
+        response.send(JSON.stringify(departments))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
 /// Church
 app.get('/getAllChurchs', async (resquest, response) => {
     try {
         let churchs = await churchDAO.getAllChurchs()
         response.send(JSON.stringify(churchs))
-    } catch {
-        response.send(error);
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
     }
 })
 
@@ -114,18 +133,37 @@ app.post('/addNewChurch', async (request, response) => {
     try {
         let churchs = await churchDAO.addChurch(request.body['name'], request.body['address'] )
         response.send(JSON.stringify(churchs))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
+/// Department
+app.get('/getAllDepartments', async (request, response) => {
+    try {
+        let departments = await departmentDAO.getAllDepartments()
+        response.send(JSON.stringify(departments))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
+app.post('/createDepartments', async (request, response) => {
+    try {
+        let departments = await departmentDAO.addDepartment(request.body['name']);
+        response.send(JSON.stringify(departments))
     } catch {
         response.send(error);
     }
 })
 
-/// Department
-app.get('/getAllDepartments', async (resquest, response) => {
+app.post('/department', async (request, response) => {
     try {
-        let departments = await departmentDAO.getAllDepartments()
+        const departmentId = request.query.id as String;
+        let departments = await departmentDAO.updateDepartment(departmentId, request.body);
         response.send(JSON.stringify(departments))
-    } catch {
-        response.send(error);
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
     }
 })
 
@@ -134,8 +172,27 @@ app.get('/getAllPositions', async (resquest, response) => {
     try {
         let positions = await positionDAO.getAllPositions()
         response.send(JSON.stringify(positions))
-    } catch {
-        response.send(error);
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
+app.post('/createPosition', async (request, response) => {
+    try {
+        let positionModel = await positionDAO.addPosition(request.body['name']);
+        response.send(JSON.stringify(positionModel))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
+    }
+})
+
+app.post('/position', async (request, response) => {
+    try {
+        const positionId = request.query.id as String;
+        let position = await positionDAO.updatePosition(positionId, request.body);
+        response.send(JSON.stringify(position))
+    } catch (error: any) {
+        response.send({error: error.name, message : error.message});
     }
 })
 
