@@ -4,6 +4,9 @@ import AuthenticatorService from '../services/authenticator_service.ts'
 import DatabaseService from '../services/database_service.ts'
 import LoginModel from '../models/login_model.ts'
 import MemberModel from '../models/member_model.ts'
+import TitleModel from '../models/title_model.ts'
+import PositionModel from '../models/position_model.ts'
+import DepartmentModel from '../models/department_model.ts'
 import MemberDAO from '../dao/member_dao.ts'
 import TitleDAO from '../dao/title_dao.ts'
 import ChurchDAO from '../dao/church_dao.ts'
@@ -40,6 +43,9 @@ app.get('/', (request, response) => {
 app.post('/deleteAllDB', async (request, response) => {
     await LoginModel.deleteMany({})
     await MemberModel.deleteMany({})
+    await TitleModel.deleteMany({})
+    await PositionModel.deleteMany({})
+    await DepartmentModel.deleteMany({})
     response.send('OK')
 })
 
@@ -148,12 +154,12 @@ app.get('/getAllDepartments', async (request, response) => {
     }
 })
 
-app.post('/createDepartments', async (request, response) => {
+app.post('/createDepartment', async (request, response) => {
     try {
         let departments = await departmentDAO.addDepartment(request.body['name']);
         response.send(JSON.stringify(departments))
-    } catch {
-        response.send(error);
+    } catch (error: any){
+        response.send({error: error.name, message : error.message});
     }
 })
 

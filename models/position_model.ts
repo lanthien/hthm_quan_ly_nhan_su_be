@@ -1,7 +1,8 @@
 import { InferSchemaType, Schema, model, models } from "mongoose";
 
 const PositionSchema = new Schema({
-    name: String
+    name: {type: String, required: true},
+    isActive: {type: Boolean, required: true},
 });
 
 export type PositionModelType = InferSchemaType<typeof PositionSchema>;

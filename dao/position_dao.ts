@@ -7,11 +7,11 @@ export default class PositionDAO {
     }
 
     async addPosition(titleName: String) : Promise<PositionModelType> {
-        const model = PositionModel.findOneAndUpdate({name : titleName}, { isActive : true });
+        const model = await PositionModel.findOne({name : titleName});
         if (model != null) {
             throw new DataException('Chức vụ đã tồn tại');
         }
-        const newPosition = new PositionModel(titleName);
+        const newPosition = new PositionModel({name: titleName, isActive: true});
         return await newPosition.save();
     }
 

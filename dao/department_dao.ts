@@ -6,11 +6,11 @@ export default class DepartmentDAO {
     }
 
     async addDepartment(titleName: String) : Promise<DepartmentModelType> {
-        const departmentModel = DepartmentModel.findOne({name : titleName});
+        const departmentModel = await DepartmentModel.findOne({"name" : titleName});
         if (departmentModel != null) {
             throw new Error('Ban ngành đã tồn tại');
         }
-        const newDepartmentModel= new DepartmentModel(titleName);
+        const newDepartmentModel= new DepartmentModel({name : titleName, isActive: true});
         return await newDepartmentModel.save();
     }
 
