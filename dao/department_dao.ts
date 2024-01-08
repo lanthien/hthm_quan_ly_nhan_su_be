@@ -2,11 +2,11 @@ import DepartmentModel, { DepartmentModelType } from "../models/department_model
 
 export default class DepartmentDAO {
     getAllDepartments() : Promise<Array<DepartmentModelType>> {
-        return DepartmentModel.find({}).exec()
+        return DepartmentModel.find({isActive: true}).exec()
     }
 
     async addDepartment(titleName: String) : Promise<DepartmentModelType> {
-        const departmentModel = await DepartmentModel.findOne({"name" : titleName});
+        const departmentModel = await DepartmentModel.findOne({name : titleName});
         if (departmentModel != null) {
             throw new Error('Ban ngành đã tồn tại');
         }
@@ -16,6 +16,6 @@ export default class DepartmentDAO {
 
     async updateDepartment(id: String, newData: Object) : Promise<DepartmentModelType | null> {
         const query = { _id : id }
-        return await DepartmentModel.findOneAndUpdate(query, newData, { new: true })
+        return await DepartmentModel.findOneAndUpdate(query, newData)
     }
 }
