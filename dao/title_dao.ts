@@ -2,7 +2,7 @@ import TitleModel, { TitleModelType } from "../models/title_model";
 
 export default class TitleDAO {
     getAllTitle() : Promise<Array<TitleModelType>> {
-        return TitleModel.find({})
+        return TitleModel.find({isActive : true})
     }
 
     async addTitle(titleName: String) : Promise<TitleModelType> {
@@ -16,6 +16,6 @@ export default class TitleDAO {
 
     async updateTitle(id: String, newData: Object) : Promise<TitleModelType | null> {
         const query = { _id : id }
-        return await TitleModel.findOneAndUpdate(query, newData, { new: true })
+        return await TitleModel.findOneAndUpdate(query, newData)
     }
 }

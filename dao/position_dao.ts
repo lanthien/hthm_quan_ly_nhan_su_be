@@ -3,7 +3,7 @@ import PositionModel, { PositionModelType } from "../models/position_model";
 
 export default class PositionDAO {
     getAllPositions() : Promise<Array<PositionModelType>> {
-        return PositionModel.find({}).exec()
+        return PositionModel.find({isActive : true}).exec()
     }
 
     async addPosition(titleName: String) : Promise<PositionModelType> {
@@ -17,7 +17,7 @@ export default class PositionDAO {
 
     async updatePosition(id: String, newData: Object) : Promise<PositionModelType | null | Error> {
         const query = { _id : id }
-        const model = await PositionModel.findOneAndUpdate(query, newData, { new: true })
+        const model = await PositionModel.findOneAndUpdate(query, newData)
         if (model == null) {
             throw new DataException('Chức vụ không tồn tại');
         }
