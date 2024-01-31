@@ -14,7 +14,7 @@ import DepartmentDAO from "../dao/department_dao.ts";
 import PositionDAO from "../dao/position_dao.ts";
 import { upload } from "../services/multer_service.ts";
 import { error } from "console";
-import { isAuth } from "../services/auth_middleware.ts";
+import { isAdminRole, isAuth } from "../services/auth_middleware.ts";
 import ChurchModel from "../models/church_model.ts";
 
 const options = {
@@ -46,7 +46,7 @@ app.get("/", (request, response) => {
   response.send("Hello NodeJS");
 });
 
-app.post("/deleteAllDB", async (request, response) => {
+app.post("/deleteAllDB", isAuth, async (request, response) => {
   await LoginModel.deleteMany({});
   await MemberModel.deleteMany({});
   await TitleModel.deleteMany({});
@@ -71,12 +71,12 @@ app.post("/refreshToken", async (request, response) =>
   service.refreshToken(request, response)
 );
 
-app.post("/signout", async (request, response) =>
+app.post("/signout", isAuth, async (request, response) =>
   service.signout(request, response)
 );
 
 //Member
-app.post("/addNewMember", isAuth, (request, response) => {
+app.post("/addNewMember", isAuth, isAdminRole, (request, response) => {
   try {
     let body = request.body;
     let responseModel = memberDAO.addNewMember(body);
@@ -86,7 +86,7 @@ app.post("/addNewMember", isAuth, (request, response) => {
   }
 });
 
-app.get("/getAllMembers", async (request, response) => {
+app.get("/getAllMembers", isAuth, async (request, response) => {
   try {
     let members = await memberDAO.getMembers();
     response.status(200).send(JSON.stringify(members));
@@ -95,7 +95,7 @@ app.get("/getAllMembers", async (request, response) => {
   }
 });
 
-app.delete("/deleteMember", async (request, response) => {
+app.delete("/deleteMember", isAuth, isAdminRole, async (request, response) => {
   try {
     let member = await memberDAO.deleteMember({ _id: request.body.userId });
     response.send(JSON.stringify(member));
@@ -104,7 +104,7 @@ app.delete("/deleteMember", async (request, response) => {
   }
 });
 
-app.delete("/updateMember", async (request, response) => {
+app.delete("/updateMember", isAuth, async (request, response) => {
   try {
     let member = await memberDAO.updateMember(request.body);
     response.send("Ok");
@@ -114,7 +114,7 @@ app.delete("/updateMember", async (request, response) => {
 });
 
 // Titles
-app.get("/getAllTitles", async (resquest, response) => {
+app.get("/getAllTitles", isAuth, async (resquest, response) => {
   try {
     let titles = await titleDAO.getAllTitle();
     response.send(JSON.stringify(titles));
@@ -123,7 +123,7 @@ app.get("/getAllTitles", async (resquest, response) => {
   }
 });
 
-app.post("/createTitle", async (request, response) => {
+app.post("/createTitle", isAuth, async (request, response) => {
   try {
     let departments = await titleDAO.addTitle(request.body["name"]);
     response.send(JSON.stringify(departments));
@@ -132,7 +132,7 @@ app.post("/createTitle", async (request, response) => {
   }
 });
 
-app.post("/title", async (request, response) => {
+app.post("/title", isAuth, async (request, response) => {
   try {
     const titleId = request.query.id as String;
     let departments = await titleDAO.updateTitle(titleId, request.body);
@@ -143,7 +143,7 @@ app.post("/title", async (request, response) => {
 });
 
 /// Church
-app.get("/getAllChurchs", async (resquest, response) => {
+app.get("/getAllChurchs", isAuth, async (resquest, response) => {
   try {
     let churchs = await churchDAO.getAllChurchs();
     response.send(JSON.stringify(churchs));
@@ -152,7 +152,7 @@ app.get("/getAllChurchs", async (resquest, response) => {
   }
 });
 
-app.post("/addNewChurch", async (request, response) => {
+app.post("/addNewChurch", isAuth, async (request, response) => {
   try {
     let churchs = await churchDAO.addChurch(
       request.body["name"],
@@ -165,7 +165,7 @@ app.post("/addNewChurch", async (request, response) => {
 });
 
 /// Department
-app.get("/getAllDepartments", async (request, response) => {
+app.get("/getAllDepartments", isAuth, async (request, response) => {
   try {
     let departments = await departmentDAO.getAllDepartments();
     response.send(JSON.stringify(departments));
@@ -174,7 +174,7 @@ app.get("/getAllDepartments", async (request, response) => {
   }
 });
 
-app.post("/createDepartment", async (request, response) => {
+app.post("/createDepartment", isAuth, async (request, response) => {
   try {
     let departments = await departmentDAO.addDepartment(request.body["name"]);
     response.send(JSON.stringify(departments));
@@ -183,7 +183,7 @@ app.post("/createDepartment", async (request, response) => {
   }
 });
 
-app.post("/department", async (request, response) => {
+app.post("/department", isAuth, async (request, response) => {
   try {
     const departmentId = request.query.id as String;
     let departments = await departmentDAO.updateDepartment(
@@ -197,7 +197,7 @@ app.post("/department", async (request, response) => {
 });
 
 /// Position
-app.get("/getAllPositions", async (resquest, response) => {
+app.get("/getAllPositions", isAuth, async (resquest, response) => {
   try {
     let positions = await positionDAO.getAllPositions();
     response.send(JSON.stringify(positions));
@@ -206,7 +206,7 @@ app.get("/getAllPositions", async (resquest, response) => {
   }
 });
 
-app.post("/createPosition", async (request, response) => {
+app.post("/createPosition", isAuth, async (request, response) => {
   try {
     let positionModel = await positionDAO.addPosition(request.body["name"]);
     response.send(JSON.stringify(positionModel));
@@ -215,7 +215,7 @@ app.post("/createPosition", async (request, response) => {
   }
 });
 
-app.post("/position", async (request, response) => {
+app.post("/position", isAuth, async (request, response) => {
   try {
     const positionId = request.query.id as String;
     let position = await positionDAO.updatePosition(positionId, request.body);
@@ -228,6 +228,7 @@ app.post("/position", async (request, response) => {
 app.post(
   "/uploadAvatar",
   upload.single("myfile"),
+  isAuth,
   (request, response, next) => {
     const file = request.file;
     if (!file) {
