@@ -46,7 +46,7 @@ app.get("/", (request, response) => {
   response.send("Hello NodeJS");
 });
 
-app.post("/deleteAllDB", isAuth, async (request, response) => {
+app.post("/deleteAllDB", async (request, response) => {
   await LoginModel.deleteMany({});
   await MemberModel.deleteMany({});
   await TitleModel.deleteMany({});
@@ -143,7 +143,7 @@ app.post("/title", isAuth, async (request, response) => {
 });
 
 /// Church
-app.get("/getAllChurchs", isAuth, async (resquest, response) => {
+app.get("/churchs/getAll", isAuth, async (resquest, response) => {
   try {
     let churchs = await churchDAO.getAllChurchs();
     response.send(JSON.stringify(churchs));
@@ -152,12 +152,26 @@ app.get("/getAllChurchs", isAuth, async (resquest, response) => {
   }
 });
 
-app.post("/addNewChurch", isAuth, async (request, response) => {
+app.post("/churchs/addNew", isAuth, async (request, response) => {
   try {
     let churchs = await churchDAO.addChurch(
       request.body["name"],
       request.body["address"]
     );
+    response.send(JSON.stringify(churchs));
+  } catch (error: any) {
+    response.status(400).send({ error: error.name, message: error.message });
+  }
+});
+
+app.post("/churchs/update", isAuth, async (request, response) => {
+  try {
+    // req.params.id
+    let churchs = await churchDAO.updateChurch(request.body["id"], {
+      name: request.body["name"],
+      address: request.body["address"],
+      isActive: request.body["isActive"],
+    });
     response.send(JSON.stringify(churchs));
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
