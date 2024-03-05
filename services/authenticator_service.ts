@@ -13,7 +13,6 @@ export default class AuthenticatorService {
     try {
       return await LoginModel.findOne({ username: username })
         .select("-password")
-        .populate("profile")
         .exec();
     } catch (error) {
       return undefined;
@@ -57,18 +56,8 @@ export default class AuthenticatorService {
       await new LoginModel({
         _id: model?.id,
         username: model?.username,
-        profile: model?.profile,
         accessToken: accessToken,
         refreshToken: refreshToken,
-      }).populate({
-        path: "profile",
-        populate: [
-          { path: "title" },
-          { path: "position" },
-          { path: "joiningChurchs" },
-          { path: "churchOwner" },
-          { path: "department" },
-        ],
       })
     );
   }
@@ -82,30 +71,15 @@ export default class AuthenticatorService {
       };
     }
     try {
-      let memberModel = new MemberModel({
-        createAt: Date(),
-      });
-      await memberModel.save();
       let loginModel = new LoginModel({
         username: username,
         password: password,
-        profile: memberModel._id,
         createAt: Date(),
       });
       await loginModel.save();
       return new LoginModel({
         username: username,
-        profile: memberModel._id,
         createAt: Date(),
-      }).populate({
-        path: "profile",
-        populate: [
-          { path: "title" },
-          { path: "position" },
-          { path: "joiningChurchs" },
-          { path: "churchOwner" },
-          { path: "department" },
-        ],
       });
     } catch (error) {
       console.log("Error " + error);
@@ -180,18 +154,8 @@ export default class AuthenticatorService {
           await new LoginModel({
             _id: loginModel?.id,
             username: loginModel?.username,
-            profile: loginModel?.profile,
             accessToken: accessToken,
             refreshToken: refreshToken,
-          }).populate({
-            path: "profile",
-            populate: [
-              { path: "title" },
-              { path: "position" },
-              { path: "joiningChurchs" },
-              { path: "churchOwner" },
-              { path: "department" },
-            ],
           })
         );
       } catch (error: any) {

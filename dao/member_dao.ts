@@ -1,9 +1,8 @@
 import { error } from "console";
-import LoginModel, { LoginModelType } from "../models/login_model";
-import MemberModel from "../models/member_model";
+import MemberModel, { MemberModelType } from "../models/member_model";
 
 export default class MemberDAO {
-  addNewMember(json: any): LoginModelType {
+  addNewMember(json: any): MemberModelType {
     let memberModel = new MemberModel({
       name: json.name,
       phoneNumer: json.phoneNumer,
@@ -27,46 +26,26 @@ export default class MemberDAO {
       isActive: true,
     });
     memberModel.save();
-    let loginModel = new LoginModel({
-      username: json.username,
-      password: json.password,
-      profile: memberModel._id,
-      createAt: Date(),
-    });
-    loginModel.save();
-
-    return loginModel;
+    return memberModel;
   }
 
-  async getMembers(query?: Object): Promise<Array<LoginModelType>> {
+  async getMembers(query?: Object): Promise<Array<MemberModelType>> {
     try {
       if (query != null) {
-        return LoginModel.find(query)
-          .select("-password -accessToken -refreshToken")
-          .populate({
-            path: "profile",
-            populate: [
-              { path: "title" },
-              { path: "position" },
-              { path: "joiningChurchs" },
-              { path: "churchOwner" },
-              { path: "department" },
-            ],
-          })
-          .exec();
+        return MemberModel.find(query).exec();
       }
-      return LoginModel.find()
-        .select("-password -accessToken -refreshToken")
-        .populate({
-          path: "profile",
-          populate: [
-            { path: "title" },
-            { path: "position" },
-            { path: "joiningChurchs" },
-            { path: "churchOwner" },
-            { path: "department" },
-          ],
-        })
+      return MemberModel.find().exec();
+    } catch {
+      console.log(error);
+      return [];
+    }
+  }
+
+  async getMemberDetail(memberId: String): Promise<Array<MemberModelType>> {
+    try {
+      return MemberModel.find({ _id: memberId })
+        .populate("title position department joiningChurchs churchOwner")
+        .populate([{ path: "familyMembers", populate: [{ path: "member" }] }])
         .exec();
     } catch {
       console.log(error);
@@ -74,11 +53,11 @@ export default class MemberDAO {
     }
   }
 
-  async deleteMember(query: Object): Promise<LoginModelType | null> {
-    return await LoginModel.findOneAndUpdate(query, { isActive: false });
+  async deleteMember(query: Object): Promise<MemberModelType | null> {
+    return await MemberModel.findOneAndUpdate(query, { isActive: false });
   }
 
   async updateMember(member: any) {
-    await LoginModel.updateOne({ _id: member.id }, member);
+    await MemberModel.updateOne({ _id: member.id }, member);
   }
 }

@@ -95,6 +95,16 @@ app.get("/getAllMembers", isAuth, async (request, response) => {
   }
 });
 
+app.get("/getMember/:id", isAuth, async (request, response) => {
+  try {
+    let id = request.params.id;
+    let member = await memberDAO.getMemberDetail(id);
+    response.status(200).send(JSON.stringify(member));
+  } catch (error: any) {
+    response.status(400).send({ error: error.name, message: error.message });
+  }
+});
+
 app.delete("/deleteMember", isAuth, isAdminRole, async (request, response) => {
   try {
     let member = await memberDAO.deleteMember({ _id: request.body.userId });
@@ -241,15 +251,20 @@ app.post("/position", isAuth, async (request, response) => {
 
 app.post(
   "/uploadAvatar",
-  upload.single("myfile"),
-  isAuth,
-  (request, response, next) => {
+  upload.single("avatar"),
+  async (request, response, next) => {
     const file = request.file;
     if (!file) {
-      var error = new Error("Please upload a file");
+      var error = new Error("Đã xảy ra lỗi");
       response.status(400);
       return next(error);
     }
-    response.send(file);
+    try {
+      const member = { id: request.body.id, avatarImage: file.filename };
+      await memberDAO.updateMember(member);
+      response.send(file);
+    } catch (error: any) {
+      response.status(400).send({ error: error.name, message: error.message });
+    }
   }
 );

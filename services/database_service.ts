@@ -6,7 +6,8 @@ import DepartmentModel from "../models/department_model.ts";
 import PositionModel from "../models/position_model.ts";
 import TitleModel from "../models/title_model.ts";
 var dbName = "Manage_HR_HocMon_Church";
-var url = `mongodb+srv://lanthiendiep:HoiThanhHocMon%402024@serverlessinstance0.mx6otzy.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+// var url = `mongodb+srv://lanthiendiep:HoiThanhHocMon%402024@serverlessinstance0.mx6otzy.mongodb.net/${dbName}?retryWrites=true&w=majority`;
+var url = "mongodb://localhost:27017/";
 
 export default class DatabaseService {
   constructor() {}
