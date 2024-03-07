@@ -5,10 +5,15 @@ const schema = new Schema({
   password: { type: String, required: true },
   loginAt: { type: Date, required: false },
   logoutAt: { type: Date, required: false },
-  role: { type: String, enum: ["admin", "user"], default: "user" },
-  permissions: { type: [String], enum: ["read", "write"], require: false },
+  role: {
+    type: String,
+    enum: ["admin", "reader", "writer"],
+    default: "reader",
+  },
   accessToken: { type: String, required: false },
   refreshToken: { type: String, required: false },
+  isActive: { type: Boolean, require: true, default: true },
+  profile: { type: Types.ObjectId, ref: "MemberModel", require: false },
 });
 
 export type LoginModelType = InferSchemaType<typeof schema>;

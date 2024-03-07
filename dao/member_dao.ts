@@ -1,5 +1,6 @@
 import { error } from "console";
 import MemberModel, { MemberModelType } from "../models/member_model";
+import LoginModel, { LoginModelType } from "../models/login_model";
 
 export default class MemberDAO {
   addNewMember(json: any): MemberModelType {
@@ -29,23 +30,20 @@ export default class MemberDAO {
     return memberModel;
   }
 
-  async getMembers(query?: Object): Promise<Array<MemberModelType>> {
+  async getAllMembers(): Promise<Array<LoginModelType>> {
     try {
-      if (query != null) {
-        return MemberModel.find(query).exec();
-      }
-      return MemberModel.find().exec();
-    } catch {
-      console.log(error);
-      return [];
-    }
-  }
-
-  async getMemberDetail(memberId: String): Promise<Array<MemberModelType>> {
-    try {
-      return MemberModel.find({ _id: memberId })
-        .populate("title position department joiningChurchs churchOwner")
-        .populate([{ path: "familyMembers", populate: [{ path: "member" }] }])
+      return LoginModel.find()
+        .populate({
+          path: "profile",
+          options: { strict: false },
+          populate: [
+            { path: "title" },
+            { path: "position" },
+            { path: "joiningChurchs" },
+            { path: "churchOwner" },
+            { path: "department" },
+          ],
+        })
         .exec();
     } catch {
       console.log(error);
@@ -53,11 +51,33 @@ export default class MemberDAO {
     }
   }
 
-  async deleteMember(query: Object): Promise<MemberModelType | null> {
-    return await MemberModel.findOneAndUpdate(query, { isActive: false });
+  async getMemberDetail(accounntId: String): Promise<Array<LoginModelType>> {
+    try {
+      return LoginModel.find({ _id: accounntId })
+        .populate({
+          path: "profile",
+          options: { strict: false },
+          populate: [
+            { path: "title" },
+            { path: "position" },
+            { path: "joiningChurchs" },
+            { path: "churchOwner" },
+            { path: "department" },
+            { path: "familyMembers" },
+          ],
+        })
+        .exec();
+    } catch {
+      console.log(error);
+      return [];
+    }
   }
 
-  async updateMember(member: any) {
-    await MemberModel.updateOne({ _id: member.id }, member);
+  async deleteMember(query: Object): Promise<LoginModelType | null> {
+    return LoginModel.findOneAndUpdate(query, { isActive: false });
+  }
+
+  async updateMember(account: any) {
+    await LoginModel.updateOne({ _id: account.id }, account);
   }
 }

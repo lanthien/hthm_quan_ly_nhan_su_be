@@ -7,7 +7,6 @@ import MemberModel from "../models/member_model.ts";
 import TitleModel from "../models/title_model.ts";
 import PositionModel from "../models/position_model.ts";
 import DepartmentModel from "../models/department_model.ts";
-import MemberDAO from "../dao/member_dao.ts";
 import TitleDAO from "../dao/title_dao.ts";
 import ChurchDAO from "../dao/church_dao.ts";
 import DepartmentDAO from "../dao/department_dao.ts";
@@ -16,6 +15,7 @@ import { upload } from "../services/multer_service.ts";
 import { error } from "console";
 import { isAdminRole, isAuth } from "../services/auth_middleware.ts";
 import ChurchModel from "../models/church_model.ts";
+import MemberDAO from "../dao/member_dao.ts";
 
 const options = {
   key: fs.readFileSync("../resources/config_files/key.pem"),
@@ -88,7 +88,7 @@ app.post("/addNewMember", isAuth, isAdminRole, (request, response) => {
 
 app.get("/getAllMembers", isAuth, async (request, response) => {
   try {
-    let members = await memberDAO.getMembers();
+    let members = await memberDAO.getAllMembers();
     response.status(200).send(JSON.stringify(members));
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
@@ -260,7 +260,10 @@ app.post(
       return next(error);
     }
     try {
-      const member = { id: request.body.id, avatarImage: file.filename };
+      const member = {
+        id: request.body.id,
+        avatarImage: request.headers.host + file.filename,
+      };
       await memberDAO.updateMember(member);
       response.send(file);
     } catch (error: any) {
