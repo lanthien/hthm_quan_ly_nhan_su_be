@@ -3,48 +3,58 @@ import MemberModel, { MemberModelType } from "../models/member_model";
 import LoginModel, { LoginModelType } from "../models/login_model";
 
 export default class MemberDAO {
-  addNewMember(json: any): MemberModelType {
+  async addNewMember(json: any): Promise<LoginModelType> {
+    let profileJson = json["profile"];
     let memberModel = new MemberModel({
-      name: json.name,
-      phoneNumer: json.phoneNumer,
-      personalId: json.personalId,
-      title: json.title,
-      position: json.position,
-      department: json.department,
-      genre: json.genre,
-      national: json.national,
-      birthday: json.birthday,
-      tempAddress: json.tempAddress,
-      permanentAddress: json.permanentAddress,
+      name: profileJson.name,
+      phoneNumer: profileJson.phoneNumer,
+      personalId: profileJson.personalId,
+      title: profileJson.title,
+      position: profileJson.position,
+      department: profileJson.department,
+      genre: profileJson.genre,
+      national: profileJson.national,
+      birthday: profileJson.birthday,
+      tempAddress: profileJson.tempAddress,
+      permanentAddress: profileJson.permanentAddress,
       joiningChurchs:
-        json.joiningChurchs == null ||
-        json.joiningChurchs.toString().length === 0
+        profileJson.joiningChurchs == null ||
+        profileJson.joiningChurchs.toString().length === 0
           ? undefined
-          : json.joiningChurchs.toString().split(","),
-      churchOwner: json.churchOwner ?? undefined,
+          : profileJson.joiningChurchs.toString().split(","),
+      churchOwner: profileJson.churchOwner ?? undefined,
       updateAt: new Date().getMilliseconds(),
       createAt: new Date().getMilliseconds(),
       isActive: true,
     });
-    memberModel.save();
-    return memberModel;
+    await memberModel.save();
+    let loginModel = new LoginModel({
+      username: json.username,
+      password: json.password,
+      profile: memberModel._id,
+    });
+    await loginModel.save();
+
+    return new LoginModel({
+      username: json.username,
+      roles: loginModel.roles,
+      profile: memberModel._id,
+    }).populate({
+      path: "profile",
+      options: { strict: false },
+      populate: [
+        { path: "title" },
+        { path: "position" },
+        { path: "joiningChurchs" },
+        { path: "churchOwner" },
+        { path: "department" },
+      ],
+    });
   }
 
   async getAllMembers(): Promise<Array<LoginModelType>> {
     try {
-      return LoginModel.find()
-        .populate({
-          path: "profile",
-          options: { strict: false },
-          populate: [
-            { path: "title" },
-            { path: "position" },
-            { path: "joiningChurchs" },
-            { path: "churchOwner" },
-            { path: "department" },
-          ],
-        })
-        .exec();
+      return LoginModel.find().select("-password").populate("profile").exec();
     } catch {
       console.log(error);
       return [];
@@ -54,6 +64,7 @@ export default class MemberDAO {
   async getMemberDetail(accounntId: String): Promise<Array<LoginModelType>> {
     try {
       return LoginModel.find({ _id: accounntId })
+        .select("-password")
         .populate({
           path: "profile",
           options: { strict: false },
@@ -74,10 +85,14 @@ export default class MemberDAO {
   }
 
   async deleteMember(query: Object): Promise<LoginModelType | null> {
-    return LoginModel.findOneAndUpdate(query, { isActive: false });
+    return await LoginModel.findOneAndUpdate(query, { isActive: false })
+      .select("-password")
+      .exec();
   }
 
-  async updateMember(account: any) {
-    await LoginModel.updateOne({ _id: account.id }, account);
+  async updateMember(memberInfo: any) {
+    await MemberModel.updateOne({ _id: memberInfo.id }, memberInfo)
+      .select("-password")
+      .exec();
   }
 }

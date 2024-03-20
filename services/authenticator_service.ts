@@ -36,7 +36,7 @@ export default class AuthenticatorService {
     let userData = {
       name: model!.username,
       _id: model!._id,
-      role: model!.role,
+      role: model!.roles,
     };
     const accessToken = await jwtHelper.generateToken(
       userData,
@@ -58,6 +58,17 @@ export default class AuthenticatorService {
         username: model?.username,
         accessToken: accessToken,
         refreshToken: refreshToken,
+        profile: model?.profile,
+      }).populate({
+        path: "profile",
+        options: { strict: false },
+        populate: [
+          { path: "title" },
+          { path: "position" },
+          { path: "joiningChurchs" },
+          { path: "churchOwner" },
+          { path: "department" },
+        ],
       })
     );
   }

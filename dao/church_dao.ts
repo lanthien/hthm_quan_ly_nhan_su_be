@@ -7,7 +7,7 @@ export default class ChurchDAO {
 
   async addChurch(
     titleName: String,
-    address: String
+    address: Object
   ): Promise<ChurchModelType> {
     const newPosition = new ChurchModel({
       name: titleName,

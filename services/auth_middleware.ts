@@ -38,7 +38,7 @@ export let isAdminRole = async (req: any, res: any, next: any) => {
       const loginModel = await LoginModel.findOne({
         username: userData.name,
       }).exec();
-      if (loginModel?.role == "admin") {
+      if (loginModel?.roles.includes("admin")) {
         next();
       } else {
         return res.status(406).json({

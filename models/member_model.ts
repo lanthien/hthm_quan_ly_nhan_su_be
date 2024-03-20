@@ -1,4 +1,5 @@
 import { model, InferSchemaType, Schema, Types } from "mongoose";
+import { AddressType } from "./address_unit_model";
 
 var MemberModelSchema = new Schema({
   name: String,
@@ -11,21 +12,15 @@ var MemberModelSchema = new Schema({
   genre: String,
   national: String,
   birthday: { type: Date, trim: true },
-  tempAddress: {
-    type: { address: String, province: String, district: String, city: String },
-    required: false,
-  },
-  permanentAddress: {
-    type: { address: String, province: String, district: String, city: String },
-    required: false,
-  },
+  tempAddress: AddressType,
+  permanentAddress: AddressType,
   joiningChurchs: [{ type: Types.ObjectId, ref: "ChurchModel", default: [] }],
   churchOwner: [{ type: Types.ObjectId, ref: "ChurchModel", default: [] }],
   familyMembers: [
     {
       type: {
         type: String,
-        member: { type: String, ref: "LoginModel" },
+        member: { type: Types.ObjectId, ref: "LoginModel" },
       },
     },
   ],

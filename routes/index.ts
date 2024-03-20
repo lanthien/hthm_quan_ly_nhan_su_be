@@ -33,8 +33,7 @@ var app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 databaseService.initialDatabase();
-app.use(express.static(__dirname + "/public"));
-app.use("/uploads", express.static("uploads"));
+app.use(express.static("../resources/public"));
 
 app.listen(12345, () => {
   console.log("server is runing at port 4000");
@@ -48,7 +47,8 @@ app.get("/", (request, response) => {
 
 app.post("/deleteAllDB", async (request, response) => {
   await LoginModel.deleteMany({});
-  await MemberModel.deleteMany({});
+  //127.0.0.1:12345/resources/images
+  http: await MemberModel.deleteMany({});
   await TitleModel.deleteMany({});
   await PositionModel.deleteMany({});
   await DepartmentModel.deleteMany({});
@@ -76,13 +76,13 @@ app.post("/signout", isAuth, async (request, response) =>
 );
 
 //Member
-app.post("/addNewMember", isAuth, isAdminRole, (request, response) => {
+app.post("/addNewMember", isAuth, isAdminRole, async (request, response) => {
   try {
     let body = request.body;
-    let responseModel = memberDAO.addNewMember(body);
-    response.status(200).send(JSON.stringify(responseModel));
+    let responseModel = await memberDAO.addNewMember(body);
+    response.status(200).json(responseModel);
   } catch (error: any) {
-    response.status(400).send({ error: error.name, message: error.message });
+    response.status(400).json({ error: error.name, message: error.message });
   }
 });
 
@@ -262,7 +262,7 @@ app.post(
     try {
       const member = {
         id: request.body.id,
-        avatarImage: request.headers.host + file.filename,
+        avatarImage: `${request.protocol}://${request.headers.host}/avatarImages/${file.filename}`,
       };
       await memberDAO.updateMember(member);
       response.send(file);

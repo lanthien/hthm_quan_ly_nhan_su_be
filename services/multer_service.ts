@@ -1,10 +1,9 @@
 import multer from "multer";
 import path from "path";
-import { isNull, isUndefined } from "../constants/utils";
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "../resources/images");
+    cb(null, "../resources/public/avatarImages");
   },
   filename: function (req, file, cb) {
     const fileTypes = /jpeg|jpg|png|gif|svg/;

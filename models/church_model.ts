@@ -1,11 +1,9 @@
 import { InferSchemaType, Schema, model, models } from "mongoose";
+import { AddressType } from "./address_unit_model";
 
 const ChurchSchema = new Schema({
   name: { type: String, unique: true, required: true },
-  address: {
-    type: { address: String, province: String, district: String, city: String },
-    required: false,
-  },
+  address: AddressType,
   createAt: Date,
   isActive: { type: Boolean, default: true },
 });
