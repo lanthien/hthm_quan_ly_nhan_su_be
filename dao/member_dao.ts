@@ -7,7 +7,7 @@ export default class MemberDAO {
     let profileJson = json["profile"];
     let memberModel = new MemberModel({
       name: profileJson.name,
-      phoneNumer: profileJson.phoneNumer,
+      phoneNumber: profileJson.phoneNumber,
       personalId: profileJson.personalId,
       title: profileJson.title,
       position: profileJson.position,
@@ -54,34 +54,44 @@ export default class MemberDAO {
 
   async getAllMembers(): Promise<Array<LoginModelType>> {
     try {
-      return LoginModel.find().select("-password").populate("profile").exec();
-    } catch {
-      console.log(error);
-      return [];
-    }
-  }
-
-  async getMemberDetail(accounntId: String): Promise<Array<LoginModelType>> {
-    try {
-      return LoginModel.find({ _id: accounntId })
-        .select("-password")
+      return LoginModel.find()
+        .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          options: { strict: false },
-          populate: [
-            { path: "title" },
-            { path: "position" },
-            { path: "joiningChurchs" },
-            { path: "churchOwner" },
-            { path: "department" },
-            { path: "familyMembers" },
-          ],
+          select: "-familyMembers",
         })
         .exec();
     } catch {
       console.log(error);
       return [];
     }
+  }
+
+  async getMemberDetail(accounntId: String): Promise<LoginModelType | null> {
+    return LoginModel.findOne({ _id: accounntId })
+      .select("-password -accessToken -refreshToken")
+      .populate({
+        path: "profile",
+        populate: [
+          { path: "title" },
+          { path: "position" },
+          { path: "joiningChurchs" },
+          { path: "churchOwner" },
+          { path: "department" },
+          {
+            path: "familyMembers",
+            populate: {
+              path: "member",
+              populate: [
+                {
+                  path: "profile",
+                  select: "name personalId phoneNumber",
+                },
+              ],
+            },
+          },
+        ],
+      });
   }
 
   async deleteMember(query: Object): Promise<LoginModelType | null> {

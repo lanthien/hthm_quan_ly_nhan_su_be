@@ -4,7 +4,7 @@ import { AddressType } from "./address_unit_model";
 var MemberModelSchema = new Schema({
   name: String,
   avatarImage: { type: String, require: false },
-  phoneNumer: String,
+  phoneNumber: String,
   personalId: String,
   title: { type: Types.ObjectId, ref: "TitleModel" },
   position: { type: Types.ObjectId, ref: "PositionModel" },
@@ -18,10 +18,11 @@ var MemberModelSchema = new Schema({
   churchOwner: [{ type: Types.ObjectId, ref: "ChurchModel", default: [] }],
   familyMembers: [
     {
-      type: {
+      relationshipType: {
         type: String,
-        member: { type: Types.ObjectId, ref: "LoginModel" },
+        enum: ["husband", "wife", "brother", "sister", "child", "none"],
       },
+      member: { type: Types.ObjectId, ref: "LoginModel" },
     },
   ],
 });

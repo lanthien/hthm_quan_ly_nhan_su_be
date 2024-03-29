@@ -89,7 +89,7 @@ app.post("/addNewMember", isAuth, isAdminRole, async (request, response) => {
 app.get("/getAllMembers", isAuth, async (request, response) => {
   try {
     let members = await memberDAO.getAllMembers();
-    response.status(200).send(JSON.stringify(members));
+    response.status(200).json(members);
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
   }
@@ -99,7 +99,7 @@ app.get("/getMember/:id", isAuth, async (request, response) => {
   try {
     let id = request.params.id;
     let member = await memberDAO.getMemberDetail(id);
-    response.status(200).send(JSON.stringify(member));
+    response.status(200).json(member);
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
   }
