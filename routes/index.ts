@@ -123,6 +123,16 @@ app.delete("/updateMember", isAuth, async (request, response) => {
   }
 });
 
+app.get("/member/search", isAuth, async (request, response) => {
+  try {
+    let query = request.query.query as String;
+    let members = await memberDAO.searchMembers(query);
+    response.status(200).json(members);
+  } catch (error: any) {
+    response.status(400).send({ error: error.name, message: error.message });
+  }
+});
+
 // Titles
 app.get("/getAllTitles", isAuth, async (resquest, response) => {
   try {

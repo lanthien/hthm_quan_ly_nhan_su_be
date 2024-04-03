@@ -52,6 +52,11 @@ export default class MemberDAO {
     });
   }
 
+  async searchMembers(query: String): Promise<Array<LoginModelType>> {
+    let pipeline = this._buildSearchMemberWith(query);
+    return LoginModel.aggregate(pipeline).exec();
+  }
+
   async getAllMembers(): Promise<Array<LoginModelType>> {
     try {
       return LoginModel.find()
@@ -104,5 +109,108 @@ export default class MemberDAO {
     await MemberModel.updateOne({ _id: memberInfo.id }, memberInfo)
       .select("-password")
       .exec();
+  }
+
+  private _buildSearchMemberWith(query: String): Array<any> {
+    return [
+      // Link LoginModel to MemberModel
+      {
+        $lookup: {
+          from: "membermodels",
+          localField: "profile",
+          foreignField: "_id",
+          as: "profile",
+        },
+      },
+      {
+        $unwind: "$profile",
+      },
+      // Link MemberModel to DeparmentModel
+      {
+        $lookup: {
+          from: "departmentmodels",
+          localField: "profile.department",
+          foreignField: "_id",
+          as: "profile.department",
+        },
+      },
+      {
+        $unwind: {
+          path: "$profile.department",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Link MemberModel to PositionModel
+      {
+        $lookup: {
+          from: "positionmodels",
+          localField: "profile.position",
+          foreignField: "_id",
+          as: "profile.position",
+        },
+      },
+      {
+        $unwind: {
+          path: "$profile.position",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Link MemberModel to TitleModel
+      {
+        $lookup: {
+          from: "titlemodels",
+          localField: "profile.title",
+          foreignField: "_id",
+          as: "profile.title",
+        },
+      },
+      {
+        $unwind: {
+          path: "$profile.title",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      // Search
+      {
+        $match: {
+          $or: [
+            { "profile.name": { $regex: query } },
+            { "profile.department.name": { $regex: query } },
+            { "profile.position.name": { $regex: query } },
+            { "profile.title.name": { $regex: query } },
+          ],
+        },
+      },
+      // Remove password
+      {
+        $replaceWith: {
+          $setField: {
+            field: "password",
+            input: "$$ROOT",
+            value: "$$REMOVE",
+          },
+        },
+      },
+      // Remove refreshToken
+      {
+        $replaceWith: {
+          $setField: {
+            field: "refreshToken",
+            input: "$$ROOT",
+            value: "$$REMOVE",
+          },
+        },
+      },
+      // Remove accessToken
+      {
+        $replaceWith: {
+          $setField: {
+            field: "accessToken",
+            input: "$$ROOT",
+            value: "$$REMOVE",
+          },
+        },
+      },
+    ];
   }
 }
