@@ -123,7 +123,7 @@ app.delete("/updateMember", isAuth, async (request, response) => {
   }
 });
 
-app.get("/member/search", isAuth, async (request, response) => {
+app.get("/members/search", isAuth, async (request, response) => {
   try {
     let query = request.query.query as String;
     let members = await memberDAO.searchMembers(query);

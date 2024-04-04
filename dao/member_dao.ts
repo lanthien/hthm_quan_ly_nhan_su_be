@@ -63,7 +63,8 @@ export default class MemberDAO {
         .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          select: "-familyMembers",
+          select:
+            "-familyMembers -position -department -joiningChurchs -churchOwner -title",
         })
         .exec();
     } catch {
@@ -90,7 +91,8 @@ export default class MemberDAO {
               populate: [
                 {
                   path: "profile",
-                  select: "name personalId phoneNumber",
+                  select:
+                    "-familyMembers -position -department -joiningChurchs -churchOwner -title",
                 },
               ],
             },
@@ -181,36 +183,13 @@ export default class MemberDAO {
           ],
         },
       },
-      // Remove password
-      {
-        $replaceWith: {
-          $setField: {
-            field: "password",
-            input: "$$ROOT",
-            value: "$$REMOVE",
-          },
-        },
-      },
-      // Remove refreshToken
-      {
-        $replaceWith: {
-          $setField: {
-            field: "refreshToken",
-            input: "$$ROOT",
-            value: "$$REMOVE",
-          },
-        },
-      },
-      // Remove accessToken
-      {
-        $replaceWith: {
-          $setField: {
-            field: "accessToken",
-            input: "$$ROOT",
-            value: "$$REMOVE",
-          },
-        },
-      },
+      // Remove data in json
+      { $unset: "password" },
+      { $unset: "refreshToken" },
+      { $unset: "accessToken" },
+      { $unset: "profile.joiningChurchs" },
+      { $unset: "profile.churchOwner" },
+      { $unset: "profile.familyMembers" },
     ];
   }
 }
