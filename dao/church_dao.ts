@@ -24,4 +24,22 @@ export default class ChurchDAO {
     const query = { _id: id };
     return await ChurchModel.findOneAndUpdate(query, newData);
   }
+
+  async searchChurchs(req: any, res: any) {
+    try {
+      let query: String = req.query.query as String;
+      let deparments = await ChurchModel.find({
+        $or: [
+          { name: { $regex: query } },
+          { "address.houseNumber": { $regex: query } },
+          { "address.province.name": { $regex: query } },
+          { "address.district.name": { $regex: query } },
+          { "address.commune.name": { $regex: query } },
+        ],
+      }).exec();
+      res.status(200).json(deparments);
+    } catch (error: any) {
+      res.status(400).send({ error: error.name, message: error.message });
+    }
+  }
 }

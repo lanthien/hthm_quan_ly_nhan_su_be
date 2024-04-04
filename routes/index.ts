@@ -162,6 +162,10 @@ app.post("/title", isAuth, async (request, response) => {
   }
 });
 
+app.get("/titles/search", isAuth, async (request, response) =>
+  titleDAO.searchTitles(request, response)
+);
+
 /// Church
 app.get("/churchs/getAll", isAuth, async (resquest, response) => {
   try {
@@ -198,6 +202,10 @@ app.post("/churchs/update", isAuth, async (request, response) => {
   }
 });
 
+app.get("/churchs/search", isAuth, async (request, response) =>
+  churchDAO.searchChurchs(request, response)
+);
+
 /// Department
 app.get("/getAllDepartments", isAuth, async (request, response) => {
   try {
@@ -230,6 +238,10 @@ app.post("/department", isAuth, async (request, response) => {
   }
 });
 
+app.get("/departments/search", isAuth, async (request, response) =>
+  departmentDAO.searchDepartments(request, response)
+);
+
 /// Position
 app.get("/getAllPositions", isAuth, async (resquest, response) => {
   try {
@@ -258,6 +270,10 @@ app.post("/position", isAuth, async (request, response) => {
     response.status(400).send({ error: error.name, message: error.message });
   }
 });
+
+app.get("/positions/search", isAuth, async (request, response) =>
+  positionDAO.searchPositions(request, response)
+);
 
 app.post(
   "/uploadAvatar",
