@@ -107,10 +107,57 @@ export default class MemberDAO {
       .exec();
   }
 
-  async updateMember(memberInfo: any) {
-    await MemberModel.updateOne({ _id: memberInfo.id }, memberInfo)
-      .select("-password")
-      .exec();
+  async updateMember(json: any): Promise<LoginModelType> {
+    let memberJson = json["profile"];
+    let memberId = memberJson.id;
+    await MemberModel.updateOne({ _id: memberJson.id }, memberJson);
+
+    let profileJson = {
+      username: json["username"],
+      password: json["password"],
+      isActive: json["isActive"],
+      roles: json["roles"],
+    };
+    await LoginModel.updateOne({ _id: json["id"] }, profileJson).populate({
+      path: "profile",
+      options: { strict: false },
+      populate: [
+        { path: "title" },
+        { path: "position" },
+        { path: "joiningChurchs" },
+        { path: "churchOwner" },
+        { path: "department" },
+      ],
+    });
+
+    return new LoginModel({
+      username: json["username"],
+      isActive: json["isActive"],
+      roles: json["roles"],
+      profile: memberId,
+    }).populate({
+      path: "profile",
+      populate: [
+        { path: "title" },
+        { path: "position" },
+        { path: "joiningChurchs" },
+        { path: "churchOwner" },
+        { path: "department" },
+        {
+          path: "familyMembers",
+          populate: {
+            path: "member",
+            populate: [
+              {
+                path: "profile",
+                select:
+                  "-familyMembers -position -department -joiningChurchs -churchOwner -title",
+              },
+            ],
+          },
+        },
+      ],
+    });
   }
 
   private _buildSearchMemberWith(query: String): Array<any> {

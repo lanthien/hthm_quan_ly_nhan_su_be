@@ -114,10 +114,10 @@ app.delete("/deleteMember", isAuth, isAdminRole, async (request, response) => {
   }
 });
 
-app.delete("/updateMember", isAuth, async (request, response) => {
+app.post("/updateMember", isAuth, async (request, response) => {
   try {
     let member = await memberDAO.updateMember(request.body);
-    response.send("Ok");
+    response.status(200).json(member);
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
   }
