@@ -286,11 +286,8 @@ app.post(
       return next(error);
     }
     try {
-      const member = {
-        id: request.body.id,
-        avatarImage: `${request.protocol}://${request.headers.host}/avatarImages/${file.filename}`,
-      };
-      await memberDAO.updateMember(member);
+      let avatarPath = `/avatarImages/${file.filename}`;
+      await memberDAO.uploadAvatar(avatarPath, request, response);
       response.send(file);
     } catch (error: any) {
       response.status(400).send({ error: error.name, message: error.message });

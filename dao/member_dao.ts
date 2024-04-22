@@ -160,6 +160,27 @@ export default class MemberDAO {
     });
   }
 
+  async uploadAvatar(imagePath: String, req: any, res: any) {
+    let accountId = req.body.id;
+    if (accountId == null) {
+      res.status(200).json({ errorCode: 201, messsage: "Missing id field" });
+      return;
+    }
+    let loginModel: LoginModelType | null = await LoginModel.findOne({
+      _id: accountId,
+    });
+    if (loginModel == null) {
+      res
+        .status(200)
+        .json({ errorCode: 201, messsage: "Cannot find the account" });
+      return;
+    }
+    await MemberModel.updateOne(
+      { _id: loginModel.profile },
+      { avatarImage: imagePath }
+    );
+  }
+
   private _buildSearchMemberWith(query: String): Array<any> {
     return [
       // Link LoginModel to MemberModel
