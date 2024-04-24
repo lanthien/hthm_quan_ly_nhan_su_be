@@ -88,6 +88,7 @@ export default class MemberDAO {
             path: "familyMembers",
             populate: {
               path: "member",
+              select: "-password -accessToken -refreshToken",
               populate: [
                 {
                   path: "profile",
