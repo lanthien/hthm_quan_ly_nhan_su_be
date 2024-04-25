@@ -33,9 +33,10 @@ export default class MemberDAO {
       password: json.password,
       profile: memberModel._id,
     });
-    await loginModel.save();
+    let newUser = await loginModel.save();
 
     return new LoginModel({
+      _id: newUser._id,
       username: json.username,
       roles: loginModel.roles,
       profile: memberModel._id,

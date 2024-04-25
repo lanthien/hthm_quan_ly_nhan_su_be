@@ -76,7 +76,7 @@ app.post("/signout", isAuth, async (request, response) =>
 );
 
 //Member
-app.post("/addNewMember", isAuth, isAdminRole, async (request, response) => {
+app.post("/addNewMember", isAuth, async (request, response) => {
   try {
     let body = request.body;
     let responseModel = await memberDAO.addNewMember(body);
