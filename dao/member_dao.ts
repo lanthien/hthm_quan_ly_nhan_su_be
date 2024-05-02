@@ -1,4 +1,5 @@
 import { error } from "console";
+import fs from "fs";
 import MemberModel, { MemberModelType } from "../models/member_model";
 import LoginModel, { LoginModelType } from "../models/login_model";
 
@@ -173,14 +174,14 @@ export default class MemberDAO {
     });
     if (loginModel == null) {
       res
-        .status(200)
+        .status(201)
         .json({ errorCode: 201, messsage: "Cannot find the account" });
       return;
     }
-    await MemberModel.updateOne(
-      { _id: loginModel.profile },
-      { avatarImage: imagePath }
-    );
+    let memberModel = await MemberModel.findOne({ _id: loginModel.profile });
+    this._removeOldAvatar(memberModel?.avatarImage ?? "");
+
+    await memberModel?.updateOne({ avatarImage: imagePath });
   }
 
   private _buildSearchMemberWith(query: String): Array<any> {
@@ -261,5 +262,15 @@ export default class MemberDAO {
       { $unset: "profile.churchOwner" },
       { $unset: "profile.familyMembers" },
     ];
+  }
+
+  private async _removeOldAvatar(imagePath: string) {
+    if (imagePath.length == 0) {
+      return;
+    }
+    let fullPath = "../resources/public" + imagePath;
+    if (fs.existsSync(fullPath)) {
+      fs.rmSync(fullPath);
+    }
   }
 }
