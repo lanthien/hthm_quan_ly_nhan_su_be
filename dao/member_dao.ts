@@ -12,17 +12,11 @@ export default class MemberDAO {
       personalId: profileJson.personalId,
       title: profileJson.title,
       position: profileJson.position,
-      department: profileJson.department,
       genre: profileJson.genre,
       national: profileJson.national,
       birthday: profileJson.birthday,
       tempAddress: profileJson.tempAddress,
       permanentAddress: profileJson.permanentAddress,
-      joiningChurchs:
-        profileJson.joiningChurchs == null ||
-        profileJson.joiningChurchs.toString().length === 0
-          ? undefined
-          : profileJson.joiningChurchs.toString().split(","),
       churchOwner: profileJson.churchOwner ?? undefined,
       updateAt: new Date().getMilliseconds(),
       createAt: new Date().getMilliseconds(),
@@ -47,9 +41,7 @@ export default class MemberDAO {
       populate: [
         { path: "title" },
         { path: "position" },
-        { path: "joiningChurchs" },
         { path: "churchOwner" },
-        { path: "department" },
       ],
     });
   }
@@ -65,8 +57,7 @@ export default class MemberDAO {
         .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          select:
-            "-familyMembers -position -department -joiningChurchs -churchOwner -title",
+          select: "-familyMembers -position -churchOwner -title",
         })
         .exec();
     } catch {
@@ -83,9 +74,7 @@ export default class MemberDAO {
         populate: [
           { path: "title" },
           { path: "position" },
-          { path: "joiningChurchs" },
           { path: "churchOwner" },
-          { path: "department" },
           {
             path: "familyMembers",
             populate: {
@@ -94,8 +83,7 @@ export default class MemberDAO {
               populate: [
                 {
                   path: "profile",
-                  select:
-                    "-familyMembers -position -department -joiningChurchs -churchOwner -title",
+                  select: "-familyMembers -position -churchOwner -title",
                 },
               ],
             },
@@ -127,9 +115,7 @@ export default class MemberDAO {
       populate: [
         { path: "title" },
         { path: "position" },
-        { path: "joiningChurchs" },
         { path: "churchOwner" },
-        { path: "department" },
       ],
     });
 
@@ -143,9 +129,7 @@ export default class MemberDAO {
       populate: [
         { path: "title" },
         { path: "position" },
-        { path: "joiningChurchs" },
         { path: "churchOwner" },
-        { path: "department" },
         {
           path: "familyMembers",
           populate: {
@@ -153,8 +137,7 @@ export default class MemberDAO {
             populate: [
               {
                 path: "profile",
-                select:
-                  "-familyMembers -position -department -joiningChurchs -churchOwner -title",
+                select: "-familyMembers -position -churchOwner -title",
               },
             ],
           },
@@ -198,21 +181,6 @@ export default class MemberDAO {
       {
         $unwind: "$profile",
       },
-      // Link MemberModel to DeparmentModel
-      {
-        $lookup: {
-          from: "departmentmodels",
-          localField: "profile.department",
-          foreignField: "_id",
-          as: "profile.department",
-        },
-      },
-      {
-        $unwind: {
-          path: "$profile.department",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
       // Link MemberModel to PositionModel
       {
         $lookup: {
@@ -248,7 +216,6 @@ export default class MemberDAO {
         $match: {
           $or: [
             { "profile.name": { $regex: query } },
-            { "profile.department.name": { $regex: query } },
             { "profile.position.name": { $regex: query } },
             { "profile.title.name": { $regex: query } },
           ],
@@ -258,7 +225,6 @@ export default class MemberDAO {
       { $unset: "password" },
       { $unset: "refreshToken" },
       { $unset: "accessToken" },
-      { $unset: "profile.joiningChurchs" },
       { $unset: "profile.churchOwner" },
       { $unset: "profile.familyMembers" },
     ];

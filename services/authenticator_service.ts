@@ -65,9 +65,7 @@ export default class AuthenticatorService {
         populate: [
           { path: "title" },
           { path: "position" },
-          { path: "joiningChurchs" },
           { path: "churchOwner" },
-          { path: "department" },
         ],
       })
     );

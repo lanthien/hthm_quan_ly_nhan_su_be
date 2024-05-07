@@ -6,10 +6,8 @@ import LoginModel from "../models/login_model.ts";
 import MemberModel from "../models/member_model.ts";
 import TitleModel from "../models/title_model.ts";
 import PositionModel from "../models/position_model.ts";
-import DepartmentModel from "../models/department_model.ts";
 import TitleDAO from "../dao/title_dao.ts";
 import ChurchDAO from "../dao/church_dao.ts";
-import DepartmentDAO from "../dao/department_dao.ts";
 import PositionDAO from "../dao/position_dao.ts";
 import { upload } from "../services/multer_service.ts";
 import { error } from "console";
@@ -25,7 +23,6 @@ const databaseService = new DatabaseService();
 const memberDAO = new MemberDAO();
 const titleDAO = new TitleDAO();
 const churchDAO = new ChurchDAO();
-const departmentDAO = new DepartmentDAO();
 const positionDAO = new PositionDAO();
 
 let router = express.Router();
@@ -51,7 +48,6 @@ app.post("/deleteAllDB", async (request, response) => {
   http: await MemberModel.deleteMany({});
   await TitleModel.deleteMany({});
   await PositionModel.deleteMany({});
-  await DepartmentModel.deleteMany({});
   await ChurchModel.deleteMany({});
   response.send("OK");
 });
@@ -145,8 +141,8 @@ app.get("/getAllTitles", isAuth, async (resquest, response) => {
 
 app.post("/createTitle", isAuth, async (request, response) => {
   try {
-    let departments = await titleDAO.addTitle(request.body["name"]);
-    response.send(JSON.stringify(departments));
+    let titles = await titleDAO.addTitle(request.body["name"]);
+    response.send(JSON.stringify(titles));
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
   }
@@ -155,8 +151,8 @@ app.post("/createTitle", isAuth, async (request, response) => {
 app.post("/title", isAuth, async (request, response) => {
   try {
     const titleId = request.query.id as String;
-    let departments = await titleDAO.updateTitle(titleId, request.body);
-    response.send(JSON.stringify(departments));
+    let title = await titleDAO.updateTitle(titleId, request.body);
+    response.send(JSON.stringify(title));
   } catch (error: any) {
     response.status(400).send({ error: error.name, message: error.message });
   }
@@ -205,43 +201,6 @@ app.post("/churchs/update", isAuth, async (request, response) => {
 app.get("/churchs/search", isAuth, async (request, response) =>
   churchDAO.searchChurchs(request, response)
 );
-
-/// Department
-app.get("/getAllDepartments", isAuth, async (request, response) => {
-  try {
-    let departments = await departmentDAO.getAllDepartments();
-    response.send(JSON.stringify(departments));
-  } catch (error: any) {
-    response.status(400).send({ error: error.name, message: error.message });
-  }
-});
-
-app.post("/createDepartment", isAuth, async (request, response) => {
-  try {
-    let departments = await departmentDAO.addDepartment(request.body["name"]);
-    response.send(JSON.stringify(departments));
-  } catch (error: any) {
-    response.status(400).send({ error: error.name, message: error.message });
-  }
-});
-
-app.post("/department", isAuth, async (request, response) => {
-  try {
-    const departmentId = request.query.id as String;
-    let departments = await departmentDAO.updateDepartment(
-      departmentId,
-      request.body
-    );
-    response.send(JSON.stringify(departments));
-  } catch (error: any) {
-    response.status(400).send({ error: error.name, message: error.message });
-  }
-});
-
-app.get("/departments/search", isAuth, async (request, response) =>
-  departmentDAO.searchDepartments(request, response)
-);
-
 /// Position
 app.get("/getAllPositions", isAuth, async (resquest, response) => {
   try {

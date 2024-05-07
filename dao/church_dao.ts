@@ -28,7 +28,7 @@ export default class ChurchDAO {
   async searchChurchs(req: any, res: any) {
     try {
       let query: String = req.query.query as String;
-      let deparments = await ChurchModel.find({
+      let churchs = await ChurchModel.find({
         $or: [
           { name: { $regex: query } },
           { "address.houseNumber": { $regex: query } },
@@ -37,7 +37,7 @@ export default class ChurchDAO {
           { "address.commune.name": { $regex: query } },
         ],
       }).exec();
-      res.status(200).json(deparments);
+      res.status(200).json(churchs);
     } catch (error: any) {
       res.status(400).send({ error: error.name, message: error.message });
     }

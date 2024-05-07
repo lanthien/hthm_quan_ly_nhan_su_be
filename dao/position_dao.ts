@@ -30,10 +30,10 @@ export default class PositionDAO {
   async searchPositions(req: any, res: any) {
     try {
       let query: String = req.query.query as String;
-      let deparments = await PositionModel.find({
+      let positions = await PositionModel.find({
         name: { $regex: query },
       }).exec();
-      res.status(200).json(deparments);
+      res.status(200).json(positions);
     } catch (error: any) {
       res.status(400).send({ error: error.name, message: error.message });
     }
