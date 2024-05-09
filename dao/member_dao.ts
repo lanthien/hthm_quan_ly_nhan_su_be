@@ -57,7 +57,8 @@ export default class MemberDAO {
         .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          select: "-familyMembers -position -churchOwner -title",
+          select: "-familyMembers -churchOwner",
+          populate: [{ path: "title" }, { path: "position" }],
         })
         .exec();
     } catch {

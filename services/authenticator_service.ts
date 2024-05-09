@@ -53,13 +53,7 @@ export default class AuthenticatorService {
       { accessToken: accessToken, refreshToken: refreshToken }
     );
     return res.status(200).json(
-      await new LoginModel({
-        _id: model?.id,
-        username: model?.username,
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        profile: model?.profile,
-      }).populate({
+      await model?.populate({
         path: "profile",
         options: { strict: false },
         populate: [
