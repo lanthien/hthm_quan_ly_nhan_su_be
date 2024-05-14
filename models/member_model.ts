@@ -7,13 +7,17 @@ var MemberModelSchema = new Schema({
   phoneNumber: String,
   personalId: String,
   title: { type: Types.ObjectId, ref: "TitleModel" },
-  position: { type: Types.ObjectId, ref: "PositionModel" },
   genre: String,
   national: String,
   birthday: { type: Date, trim: true },
   tempAddress: AddressType,
   permanentAddress: AddressType,
-  churchOwner: [{ type: Types.ObjectId, ref: "ChurchModel", default: [] }],
+  churchPositions: [
+    {
+      position: { type: Types.ObjectId, ref: "PositionModel" },
+      church: { type: Types.ObjectId, ref: "ChurchModel" },
+    },
+  ],
   familyMembers: [
     {
       relationshipType: {

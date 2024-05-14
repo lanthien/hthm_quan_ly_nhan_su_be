@@ -11,13 +11,12 @@ export default class MemberDAO {
       phoneNumber: profileJson.phoneNumber,
       personalId: profileJson.personalId,
       title: profileJson.title,
-      position: profileJson.position,
       genre: profileJson.genre,
       national: profileJson.national,
       birthday: profileJson.birthday,
       tempAddress: profileJson.tempAddress,
       permanentAddress: profileJson.permanentAddress,
-      churchOwner: profileJson.churchOwner ?? undefined,
+      churchPositions: profileJson.churchPositions,
       updateAt: new Date().getMilliseconds(),
       createAt: new Date().getMilliseconds(),
       isActive: true,
@@ -37,11 +36,14 @@ export default class MemberDAO {
       profile: memberModel._id,
     }).populate({
       path: "profile",
+      select: "-churchPositions.church",
       options: { strict: false },
       populate: [
         { path: "title" },
-        { path: "position" },
-        { path: "churchOwner" },
+        {
+          path: "churchPositions",
+          populate: [{ path: "position" }],
+        },
       ],
     });
   }
@@ -57,8 +59,14 @@ export default class MemberDAO {
         .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          select: "-familyMembers -churchOwner",
-          populate: [{ path: "title" }, { path: "position" }],
+          select: "-familyMembers -churchPositions.church",
+          populate: [
+            { path: "title" },
+            {
+              path: "churchPositions",
+              populate: [{ path: "position" }],
+            },
+          ],
         })
         .exec();
     } catch {
@@ -74,17 +82,26 @@ export default class MemberDAO {
         path: "profile",
         populate: [
           { path: "title" },
-          { path: "position" },
-          { path: "churchOwner" },
+          {
+            path: "churchPositions",
+            populate: [{ path: "position" }, { path: "church" }],
+          },
           {
             path: "familyMembers",
             populate: {
               path: "member",
-              select: "-password -accessToken -refreshToken",
+              select:
+                "-password -accessToken -refreshToken -churchPositions.church",
               populate: [
                 {
                   path: "profile",
-                  select: "-familyMembers -position -churchOwner -title",
+                  select: "-familyMembers -title",
+                  populate: [
+                    {
+                      path: "churchPositions",
+                      populate: [{ path: "position" }],
+                    },
+                  ],
                 },
               ],
             },
@@ -95,7 +112,7 @@ export default class MemberDAO {
 
   async deleteMember(query: Object): Promise<LoginModelType | null> {
     return await LoginModel.findOneAndUpdate(query, { isActive: false })
-      .select("-password")
+      .select("-password -accessToken -refreshToken")
       .exec();
   }
 
@@ -112,11 +129,12 @@ export default class MemberDAO {
     };
     await LoginModel.updateOne({ _id: json["id"] }, profileJson).populate({
       path: "profile",
-      options: { strict: false },
       populate: [
         { path: "title" },
-        { path: "position" },
-        { path: "churchOwner" },
+        {
+          path: "churchPositions",
+          populate: [{ path: "position" }, { path: "church" }],
+        },
       ],
     });
 
@@ -129,16 +147,23 @@ export default class MemberDAO {
       path: "profile",
       populate: [
         { path: "title" },
-        { path: "position" },
-        { path: "churchOwner" },
+        {
+          path: "churchPositions",
+          populate: [{ path: "position" }, { path: "church" }],
+        },
         {
           path: "familyMembers",
           populate: {
             path: "member",
+            select: "-churchPositions.church",
             populate: [
               {
                 path: "profile",
-                select: "-familyMembers -position -churchOwner -title",
+                select: "-familyMembers -title",
+              },
+              {
+                path: "churchPositions",
+                populate: [{ path: "position" }],
               },
             ],
           },
@@ -186,14 +211,14 @@ export default class MemberDAO {
       {
         $lookup: {
           from: "positionmodels",
-          localField: "profile.position",
+          localField: "profile.churchPositions.position",
           foreignField: "_id",
-          as: "profile.position",
+          as: "profile.churchPositions.position",
         },
       },
       {
         $unwind: {
-          path: "$profile.position",
+          path: "$profile.churchPositions.position",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -217,7 +242,7 @@ export default class MemberDAO {
         $match: {
           $or: [
             { "profile.name": { $regex: query } },
-            { "profile.position.name": { $regex: query } },
+            { "profile.churchPosition.position.name": { $regex: query } },
             { "profile.title.name": { $regex: query } },
           ],
         },
@@ -226,7 +251,7 @@ export default class MemberDAO {
       { $unset: "password" },
       { $unset: "refreshToken" },
       { $unset: "accessToken" },
-      { $unset: "profile.churchOwner" },
+      { $unset: "profile.churchPositions.church" },
       { $unset: "profile.familyMembers" },
     ];
   }

@@ -58,8 +58,10 @@ export default class AuthenticatorService {
         options: { strict: false },
         populate: [
           { path: "title" },
-          { path: "position" },
-          { path: "churchOwner" },
+          {
+            path: "churchPositions",
+            populate: [{ path: "position" }, { path: "church" }],
+          },
         ],
       })
     );
