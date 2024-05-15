@@ -159,6 +159,7 @@ export default class AuthenticatorService {
           await new LoginModel({
             _id: loginModel?.id,
             username: loginModel?.username,
+            roles: loginModel?.roles,
             accessToken: accessToken,
             refreshToken: refreshToken,
           })
