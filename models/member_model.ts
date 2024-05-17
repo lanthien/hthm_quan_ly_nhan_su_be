@@ -12,12 +12,7 @@ var MemberModelSchema = new Schema({
   birthday: { type: Date, trim: true },
   tempAddress: AddressType,
   permanentAddress: AddressType,
-  churchPositions: [
-    {
-      position: { type: Types.ObjectId, ref: "PositionModel" },
-      church: { type: Types.ObjectId, ref: "ChurchModel" },
-    },
-  ],
+  churchPositions: [{ type: Types.ObjectId, ref: "ChurchPositionModel" }],
   familyMembers: [
     {
       relationshipType: {

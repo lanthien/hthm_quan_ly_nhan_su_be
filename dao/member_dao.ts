@@ -2,6 +2,8 @@ import { error } from "console";
 import fs from "fs";
 import MemberModel, { MemberModelType } from "../models/member_model";
 import LoginModel, { LoginModelType } from "../models/login_model";
+import PositionModel, { PositionModelType } from "../models/position_model";
+import { pipeline } from "stream";
 
 export default class MemberDAO {
   async addNewMember(json: any): Promise<LoginModelType> {
@@ -36,12 +38,12 @@ export default class MemberDAO {
       profile: memberModel._id,
     }).populate({
       path: "profile",
-      select: "-churchPositions.church",
       options: { strict: false },
       populate: [
         { path: "title" },
         {
           path: "churchPositions",
+          select: "-church",
           populate: [{ path: "position" }],
         },
       ],
@@ -49,7 +51,7 @@ export default class MemberDAO {
   }
 
   async searchMembers(query: String): Promise<Array<LoginModelType>> {
-    let pipeline = this._buildSearchMemberWith(query);
+    let pipeline = await this._buildSearchMemberWith(query);
     return LoginModel.aggregate(pipeline).exec();
   }
 
@@ -59,11 +61,12 @@ export default class MemberDAO {
         .select("-password -accessToken -refreshToken")
         .populate({
           path: "profile",
-          select: "-familyMembers -churchPositions.church",
+          select: "-familyMembers",
           populate: [
             { path: "title" },
             {
               path: "churchPositions",
+              select: "-church",
               populate: [{ path: "position" }],
             },
           ],
@@ -90,8 +93,7 @@ export default class MemberDAO {
             path: "familyMembers",
             populate: {
               path: "member",
-              select:
-                "-password -accessToken -refreshToken -churchPositions.church",
+              select: "-password -accessToken -refreshToken",
               populate: [
                 {
                   path: "profile",
@@ -99,6 +101,7 @@ export default class MemberDAO {
                   populate: [
                     {
                       path: "churchPositions",
+                      select: "-church",
                       populate: [{ path: "position" }],
                     },
                   ],
@@ -155,7 +158,6 @@ export default class MemberDAO {
           path: "familyMembers",
           populate: {
             path: "member",
-            select: "-churchPositions.church",
             populate: [
               {
                 path: "profile",
@@ -163,6 +165,7 @@ export default class MemberDAO {
               },
               {
                 path: "churchPositions",
+                select: "-church",
                 populate: [{ path: "position" }],
               },
             ],
@@ -193,7 +196,9 @@ export default class MemberDAO {
     await memberModel?.updateOne({ avatarImage: imagePath });
   }
 
-  private _buildSearchMemberWith(query: String): Array<any> {
+  async _buildSearchMemberWith(query: String): Promise<Array<any>> {
+    let positions = await PositionModel.find({}).exec();
+
     return [
       // Link LoginModel to MemberModel
       {
@@ -201,28 +206,14 @@ export default class MemberDAO {
           from: "membermodels",
           localField: "profile",
           foreignField: "_id",
+
           as: "profile",
         },
       },
       {
         $unwind: "$profile",
       },
-      // Link MemberModel to PositionModel
-      {
-        $lookup: {
-          from: "positionmodels",
-          localField: "profile.churchPositions.position",
-          foreignField: "_id",
-          as: "profile.churchPositions.position",
-        },
-      },
-      {
-        $unwind: {
-          path: "$profile.churchPositions.position",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      // Link MemberModel to TitleModel
+      // Title
       {
         $lookup: {
           from: "titlemodels",
@@ -237,21 +228,70 @@ export default class MemberDAO {
           preserveNullAndEmptyArrays: true,
         },
       },
+      // churchpositionmodels
+      {
+        $lookup: {
+          from: "churchpositionmodels",
+          localField: "profile.churchPositions",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $lookup: {
+                from: "positionmodels",
+                localField: "position",
+                foreignField: "_id",
+                as: "position",
+              },
+            },
+            {
+              $unwind: {
+                path: "$position",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $lookup: {
+                from: "churchmodels",
+                localField: "church",
+                foreignField: "_id",
+                as: "church",
+              },
+            },
+            {
+              $unwind: {
+                path: "$church",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+          ],
+          as: "profile.churchPositions",
+        },
+      },
       // Search
       {
         $match: {
           $or: [
             { "profile.name": { $regex: query } },
-            { "profile.churchPosition.position.name": { $regex: query } },
+            {
+              "profile.churchPositions": {
+                $elemMatch: { "position.name": { $regex: query } },
+              },
+            },
+            {
+              "profile.churchPositions": {
+                $elemMatch: { "church.name": { $regex: query } },
+              },
+            },
             { "profile.title.name": { $regex: query } },
           ],
         },
       },
+
       // Remove data in json
       { $unset: "password" },
       { $unset: "refreshToken" },
       { $unset: "accessToken" },
-      { $unset: "profile.churchPositions.church" },
+      { $unset: "profile.churchPositions" },
       { $unset: "profile.familyMembers" },
     ];
   }
