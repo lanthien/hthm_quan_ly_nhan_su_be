@@ -4,6 +4,7 @@ import MemberModel, { MemberModelType } from "../models/member_model";
 import LoginModel, { LoginModelType } from "../models/login_model";
 import PositionModel, { PositionModelType } from "../models/position_model";
 import { pipeline } from "stream";
+import ChurchPositionModel from "../models/church_position_model";
 
 export default class MemberDAO {
   async addNewMember(json: any): Promise<LoginModelType> {
@@ -114,15 +115,28 @@ export default class MemberDAO {
   }
 
   async deleteMember(query: Object): Promise<LoginModelType | null> {
-    return await LoginModel.findOneAndUpdate(query, { isActive: false })
-      .select("-password -accessToken -refreshToken")
-      .exec();
+    let loginModel = await LoginModel.findOne(query).select(
+      "-password -accessToken -refreshToken"
+    );
+    if (loginModel?.roles.indexOf("admin") != -1) {
+      throw new Error("Không thể xóa tài khoản này.");
+      return null;
+    }
+    loginModel?.deleteOne(query);
+    if (loginModel?.profile != undefined) {
+      let x = loginModel?.profile!.toString();
+      await MemberModel.deleteOne({
+        _id: loginModel?.profile!.toString(),
+      }).exec();
+    }
+    return loginModel;
   }
 
   async updateMember(json: any): Promise<LoginModelType> {
     let memberJson = json["profile"];
     let memberId = memberJson.id;
-    await MemberModel.updateOne({ _id: memberJson.id }, memberJson);
+
+    let x = await MemberModel.updateOne({ _id: memberJson.id }, memberJson);
 
     let profileJson = {
       username: json["username"],
@@ -141,7 +155,7 @@ export default class MemberDAO {
       ],
     });
 
-    return new LoginModel({
+    let loginModel = new LoginModel({
       username: json["username"],
       isActive: json["isActive"],
       roles: json["roles"],
@@ -173,6 +187,19 @@ export default class MemberDAO {
         },
       ],
     });
+
+    let newProfile = await MemberModel.findOne({ _id: memberJson.id });
+    let removedChurchPosition = newProfile?.churchPositions.filter(
+      (item) =>
+        (memberJson["churchPositions"] as Array<String>).indexOf(
+          item.toString()
+        ) == -1
+    );
+    removedChurchPosition?.forEach(async (element) => {
+      await ChurchPositionModel.deleteMany(element);
+    });
+
+    return loginModel;
   }
 
   async uploadAvatar(imagePath: String, req: any, res: any) {
