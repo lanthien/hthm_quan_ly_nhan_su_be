@@ -2,17 +2,12 @@ import express from "express";
 import fs from "fs";
 import AuthenticatorService from "../services/authenticator_service.ts";
 import DatabaseService from "../services/database_service.ts";
-import LoginModel from "../models/login_model.ts";
-import MemberModel from "../models/member_model.ts";
-import TitleModel from "../models/title_model.ts";
-import PositionModel from "../models/position_model.ts";
 import TitleDAO from "../dao/title_dao.ts";
 import ChurchDAO from "../dao/church_dao.ts";
 import PositionDAO from "../dao/position_dao.ts";
 import { upload } from "../services/multer_service.ts";
 import { error } from "console";
 import { isAdminRole, isAuth } from "../services/auth_middleware.ts";
-import ChurchModel from "../models/church_model.ts";
 import MemberDAO from "../dao/member_dao.ts";
 
 const options = {
@@ -42,6 +37,8 @@ app.get("/", (request, response) => {
   response.send("Hello NodeJS");
 });
 
+/** For debug
+ * 
 app.post("/deleteAllDB", async (request, response) => {
   await LoginModel.deleteMany({});
   //127.0.0.1:12345/resources/images
@@ -51,6 +48,7 @@ app.post("/deleteAllDB", async (request, response) => {
   await ChurchModel.deleteMany({});
   response.send("OK");
 });
+*/
 
 app.post("/signup", async (request, response) => {
   let body = request.body;
