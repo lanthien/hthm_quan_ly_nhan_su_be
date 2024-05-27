@@ -44,8 +44,7 @@ export default class MemberDAO {
         { path: "title" },
         {
           path: "churchPositions",
-          select: "-church",
-          populate: [{ path: "position" }],
+          populate: [{ path: "position" }, { path: "church" }],
         },
       ],
     });
@@ -124,10 +123,11 @@ export default class MemberDAO {
     }
     loginModel?.deleteOne(query);
     if (loginModel?.profile != undefined) {
-      let x = loginModel?.profile!.toString();
-      await MemberModel.deleteOne({
+      let profileId = loginModel?.profile!.toString();
+      let profile = await MemberModel.findOneAndDelete({
         _id: loginModel?.profile!.toString(),
       }).exec();
+      this._removeOldAvatar(profile?.avatarImage ?? "");
     }
     return loginModel;
   }
