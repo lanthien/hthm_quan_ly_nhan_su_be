@@ -124,10 +124,13 @@ export default class MemberDAO {
     loginModel?.deleteOne(query);
     if (loginModel?.profile != undefined) {
       let profileId = loginModel?.profile!.toString();
-      let profile = await MemberModel.findOneAndDelete({
-        _id: loginModel?.profile!.toString(),
-      }).exec();
-      this._removeOldAvatar(profile?.avatarImage ?? "");
+      let profile = await MemberModel.findOne({
+        _id: profileId,
+      });
+      if (profile?.avatarImage != null && profile?.avatarImage != undefined) {
+        this._removeOldAvatar(profile.avatarImage);
+      }
+      await profile?.deleteOne();
     }
     return loginModel;
   }
